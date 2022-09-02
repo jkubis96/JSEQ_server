@@ -303,7 +303,7 @@ function PROJECT {
 
 function PROJECT_ad {
 
-		PARAMETRS_se
+		PARAMETRS
 
 		project_name=$id_project
 		project_name_mod=$(date +'%d-%m-%Y')'_'$project_name
