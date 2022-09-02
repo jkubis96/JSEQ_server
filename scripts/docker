@@ -31,13 +31,13 @@ elif [[ $s == 'project' ]]
 then
         source=$(pwd)/scripts/projects
 		source $source
-		PROJECT
+		PROJECT_ad
 		
 elif [[ $s == 'analysis' ]]
 then
 		source=$(pwd)/scripts
 		source $source/project_selection
-		select_analysis
+		select_project
 		
 function experiment_selection {
 		if [[ $data_format  == 'fastq' && $species  == 'human' ]] || [[ $data_format  == 'fastq' && $species  == 'mice' ]] || [[ $data_format  == 'fastq' && $species  == 'custom' ]];

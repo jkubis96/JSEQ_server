@@ -300,3 +300,37 @@ function PROJECT {
 		
 
 }
+
+function PROJECT_ad {
+
+		PARAMETRS_se
+
+		project_name=$id_project
+		project_name_mod=$(date +'%d-%m-%Y')'_'$project_name
+		mkdir -p projects/$project_name
+		mkdir -p projects/$project_name/results
+		mkdir -p projects/$project_name/sc_data
+		echo ''
+		echo -e "\033[0;32m Complete"
+		echo ''
+        echo  -e '\033[1;36m Next step =>'
+		echo ''
+		
+		echo project_name=$project_name > $(pwd)/projects/$project_name/config
+		echo project_name_mod=$project_name_mod >> $(pwd)/projects/$project_name/config
+		echo species=$species >> $(pwd)/projects/$project_name/config
+		echo cell=$cell >> $(pwd)/projects/$project_name/config
+		echo data=$data >> $(pwd)/projects/$project_name/config
+		echo marker_path=$marker_path >> $(pwd)/projects/$project_name/config
+		echo library=$library > $(pwd)/projects/$project_name/config
+		echo tissue=$tissue >> $(pwd)/projects/$project_name/config
+		echo region=$region >> $(pwd)/projects/$project_name/config
+		echo status=$status >> $(pwd)/projects/$project_name/config
+		echo health_status=$health_status >> $(pwd)/projects/$project_name/config
+		echo sex=$sex >> $(pwd)/projects/$project_name/config
+		echo data_format=$data_format >> $(pwd)/projects/$project_name/config
+
+		data_select
+		
+
+}
