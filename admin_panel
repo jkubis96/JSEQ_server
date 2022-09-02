@@ -1,0 +1,79 @@
+#!/bin/bash  
+
+echo ''
+
+echo -e '\033[1;33m Welcome to the JSEQ® Single-Cell RNA Seq tool'
+
+echo -e '\033[1;33m The pipeline was prepared at the Institute of Bioorganic Chemistry, Polish Academy of Sciences'
+
+echo -e '\033[1;33m All information and references you can check in the file JSEQ manual on my GitHub'
+
+echo -e '\033[1;33m Contact: jbiosystem@gmail.com or jakub.kubis1996@gmail.com'
+
+echo ''
+echo ''
+
+
+function start {
+
+echo ''
+echo -e '\033[1;36m Choose JSEQ function:'
+echo -e '\033[1;36m -installation [install]'
+echo -e '\033[1;36m -start container [start]'
+echo ''
+echo -e '\033[1;36m Choose function:'
+echo ''
+	read s
+	s=$(echo $s | tr '[:upper:]' '[:lower:]')
+
+if [[ $s == 'install' ]]
+then
+		log_install=$(pwd)/setup/install.log.out
+	
+	sudo apt-get -y install unzip >> $log_install 2>&1
+	
+	cd setup 
+	
+	echo -e "\033[0;31m $(date) Localhost env preparing..."
+	wget -O DropSeq.zip https://github.com/broadinstitute/Drop-seq/releases/download/v2.4.0/Drop-seq_tools-2.4.0.zip >> $log_install 2>&1
+	unzip DropSeq >> $log_install 2>&1
+	mv Drop-seq_tools-2.4.0 DropSeq >> $log_install 2>&1
+	rm -r DropSeq.zip >> $log_install 2>&1
+
+	cd ..
+	
+	echo -e "\033[0;31m $(date) Docker build starting..."
+	docker build -t jseq -f Dockerfile .
+	id=$(docker images --format "{{.ID}}" jseq)
+	echo $id
+	echo id=$id > $(pwd)/setup/docker_id_admin
+	docker run --privileged --rm -it -v $(pwd):/app/JSEQ_scRNAseq $id
+		
+elif [[ $s == 'start' ]]
+then
+
+	source $(pwd)/id_file
+
+
+	if [ -d $(pwd)/projects/$id_project ]
+	then
+
+	id_project=$[$id_project+1]
+
+	echo id_project=$id_project > $(pwd)/id_file
+
+	fi
+
+    source $(pwd)/setup/docker_id_admin
+	id=$id
+	docker run --privileged --rm -it -v $(pwd):/app/JSEQ_scRNAseq $id
+		
+else
+		echo ''
+		echo -e "\033[0;31m Experiment failed - check all the data from project"
+		echo ''
+		start
+fi
+}
+
+start

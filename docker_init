@@ -1,0 +1,20 @@
+#!/bin/bash  
+
+source $(pwd)/id_file
+
+
+if [ -d $(pwd)/projects/$id_project ]
+then
+
+id_project=$[$id_project+1]
+
+echo id_project=$id_project > $(pwd)/id_file
+
+fi
+
+
+source $(pwd)/setup/docker_id
+id=$id
+docker run --privileged --rm -it -v $(pwd):/app/JSEQ_scRNAseq $id
+	
+	
