@@ -96,9 +96,8 @@ then
 		echo -e "\033[0;32m Project done"
 		echo -e "\033[0;32m Start analysis"
 		echo ''
-	
-	
-	start
+
+
 	
 elif     [[ $r == *".csv"* ]] 
 then
@@ -115,9 +114,7 @@ then
 		echo -e "\033[0;32m Start analysis"
 		echo ''
 	
-	jseq=$(pwd)/JSEQ
-	source jseq
-	start
+	
 	
 elif    [[ $r == *".txt"* ]]
 then
@@ -136,7 +133,6 @@ then
 		echo ''
 	
 	
-	start
 		
 		
 else
@@ -302,7 +298,5 @@ function PROJECT {
 
 		data_select
 		
-
-fi
 
 }
