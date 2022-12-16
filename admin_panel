@@ -20,6 +20,7 @@ echo ''
 echo -e '\033[1;36m Choose JSEQ function:'
 echo -e '\033[1;36m -installation [install]'
 echo -e '\033[1;36m -start container [start]'
+echo -e '\033[1;36m -quit [q]'
 echo ''
 echo -e '\033[1;36m Choose function:'
 echo ''
@@ -52,21 +53,15 @@ then
 elif [[ $s == 'start' ]]
 then
 
-	source $(pwd)/id_file
 
-
-	if [ -d $(pwd)/projects/$id_project ]
-	then
-
-	id_project=$[$id_project+1]
-
-	echo id_project=$id_project > $(pwd)/id_file
-
-	fi
 
     source $(pwd)/setup/docker_id_admin
 	id=$id
 	docker run --privileged --rm -it -v $(pwd):/app/JSEQ_scRNAseq $id
+	
+elif [[ $s == 'q' ]]
+then
+        exit
 		
 else
 		echo ''
