@@ -124,6 +124,7 @@ RUN sudo chmod +rwx $(pwd)/JSEQ_scRNAseq/results
 
 WORKDIR /app/JSEQ_scRNAseq
 
+RUN chmod +rwx $(pwd)/JSEQ_scRNAseq/run.R
 RUN sudo -i Rscript $(pwd)/JSEQ_scRNAseq/run.R
 
 
