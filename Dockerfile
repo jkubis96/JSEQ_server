@@ -54,6 +54,7 @@ RUN sudo apt-get -y install r-cran-biocmanager
 RUN sudo apt-get -y install r-cran-plotly
 RUN sudo apt-get -y install r-cran-gridextra
 
+
 RUN sudo apt-get update
 
 
@@ -122,7 +123,8 @@ RUN sudo chmod +rwx $(pwd)/JSEQ_scRNAseq/results
 
 
 WORKDIR /app/JSEQ_scRNAseq
-CMD $(pwd)/scripts/run_analysis
+
+RUN sudo -i Rscript $(pwd)/JSEQ_scRNAseq/run.R
 
 
 

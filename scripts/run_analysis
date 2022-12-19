@@ -1,21 +1,5 @@
 #!/bin/bash 
 
-		source $(pwd)/id_file
-
-
-		if [ -d $(pwd)/projects/$id_project ]
-		then
-
-		id_project=$[$id_project+1]
-
-		echo id_project=$id_project > $(pwd)/id_file
-
-		fi
-	
-        source=$(pwd)/scripts/projects
-		source $source
-		PROJECT
-		
 		
 function experiment_selection {
 		if [[ $data_format  == 'fastq' && $species  == 'human' ]] || [[ $data_format  == 'fastq' && $species  == 'mice' ]] || [[ $data_format  == 'fastq' && $species  == 'custom' ]];
