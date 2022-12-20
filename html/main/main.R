@@ -200,6 +200,7 @@ server <- function(input, output, session) {
     
     )
     
+    conf <- gsub(pattern = ' ', replacement = '', conf)
     
     writeLines(conf, file.path(paste0('../../projects/',directory, "/config")))
     
