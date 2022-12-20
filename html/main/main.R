@@ -139,8 +139,8 @@ server <- function(input, output, session) {
     CHECK <- TRUE
     
     while(CHECK) {
-      samp<-c(2:9,letters,LETTERS,"!", "$", "%", "&", "(", ")", "*")
-      code <- paste(sample(samp,8),collapse="")
+      samp<-c(2:9,letters,LETTERS,"!", "#", "%")
+      code <- paste(sample(samp,10),collapse="")
       
       if (TRUE %in% grepl(pattern = code, x = list.files(file.path('../../projects')))) {
         CHECK = TRUE
