@@ -95,26 +95,7 @@ RUN cd JSEQ_server/setup \
 
 RUN sudo apt-get update -y
 
-RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/analysis_mix
-RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/analysis_species
-RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/converter.R
-RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/functions.R
-RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/genome_indexing
-RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/merge_genome.py
-RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/project_selection
-RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/projects
-RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/report_mix.Rmd
-RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/report_species.Rmd
-RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/report_mix_manual.Rmd
-RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/report_species_manual.Rmd
-RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/rna_metrics.R
-RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/seurat_analysis
-RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/seurat_cluster_mix.R
-RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/seurat_cluster_species.R
-RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/rna_metrics.R
-RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/add_tags.py
-RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/manual_species.R
-RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/manual_mix.R
+
 
 RUN mkdir $(pwd)/JSEQ_server/projects
 RUN sudo chmod +rwx $(pwd)/JSEQ_server/projects
