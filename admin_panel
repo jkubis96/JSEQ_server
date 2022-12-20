@@ -44,8 +44,8 @@ then
 	cd ..
 	
 	echo -e "\033[0;31m $(date) Docker build starting..."
-	sudo docker build -t jseq -f Dockerfile_admin .
-	id=$(docker images --format "{{.ID}}" jseq)
+	sudo docker build -t jseq_server -f Dockerfile_admin .
+	id=$(docker images --format "{{.ID}}" jseq_server)
 	echo $id
 	echo id=$id > $(pwd)/setup/docker_id_admin
 	sudo docker run --privileged --rm -it -v $(pwd):/app/JSEQ_server $id

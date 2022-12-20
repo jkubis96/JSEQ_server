@@ -4,7 +4,7 @@
 function experiment_selection {
 		if [[ $data_format  == 'fastq' && $species  == 'human' ]] || [[ $data_format  == 'fastq' && $species  == 'mice' ]] || [[ $data_format  == 'fastq' && $species  == 'custom' ]];
 then
-		log=$(pwd)/projects/$project_name/results/process.log.out
+		log=$(pwd)/projects/$directory_name/results/process.log.out
         source=$(pwd)/scripts
 		source $source/analysis_species
 		echo ''
@@ -47,7 +47,7 @@ then
 elif	[[ $species  == 'human' && $data_format  == 'matrix' ]] || [[ $species  == 'mice' && $data_format  == 'matrix' ]] || [[ $species  == 'custom' && $data_format  == 'matrix' ]] || [[ $species  == 'human' && $data_format  == 'sparse' ]] || [[ $species  == 'mice' && $data_format  == 'sparse' ]] || [[ $species  == 'custom' && $data_format  == 'sparse' ]]
 then
 
-		log=$(pwd)/projects/$project_name/results/process.log.out
+		log=$(pwd)/projects/$directory_name/results/process.log.out
 		
 		source=$(pwd)/scripts
 		source $source/seurat_analysis

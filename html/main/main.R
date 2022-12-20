@@ -150,21 +150,31 @@ server <- function(input, output, session) {
       
     }
     
-    dir.create(file.path( paste0('../../projects/',as.character(input$project_name), '_', as.character(input$user), '_', as.character(code) )))
-    dir.create(file.path( paste0('../../projects/',as.character(input$project_name), '_', as.character(input$user), '_', as.character(code), '/sc_data'  )))
-    dir.create(file.path(paste0('../../projects/',as.character(input$project_name), '_', as.character(input$user), '_', as.character(code), '/results'  )))
+    directory = paste0('project_name=', as.character(input$project_name), '_',
+                       'user=', as.character(input$user) , '_', 
+                       'id=', as.character(code) , '_',
+                       'species=', as.character(input$species), '_',
+                       'tissue=', as.character(input$tissue), '_',
+                       'tissue_affiliation=', as.character(input$affiliation), '_',
+                       'cell_disease_status=', as.character(input$status), '_',
+                       'cell_development_status=', as.character(input$development) , '_')
+    
+    
+    dir.create(file.path( paste0('../../projects/',directory )))
+    dir.create(file.path( paste0('../../projects/',directory, '/sc_data'  )))
+    dir.create(file.path(paste0('../../projects/',directory, '/results'  )))
     
     
     if (input$input == 'fastq') {
-      dir.create(file.path(paste0('../../projects/',as.character(input$project_name), '_', as.character(input$user), '_', as.character(code), '/fasta' )))
+      dir.create(file.path(paste0('../../projects/',directory, '/fasta' )))
       
-      destDir <- file.path(paste0('../../projects/',as.character(input$project_name), '_', as.character(input$user), '_', as.character(code), '/fasta' ))
+      destDir <- file.path(paste0('../../projects/',directory, '/fasta' ))
      
       inFile <- input$files
       file.copy( inFile$datapath, file.path(destDir, inFile$name) )
 
     } else {
-      destDir <- file.path(paste0('../../projects/',as.character(input$project_name), '_', as.character(input$user), '_', as.character(code), '/sc_data' ))
+      destDir <- file.path(paste0('../../projects/',directory, '/sc_data' ))
       
       inFile <- input$files
       file.copy(inFile$datapath, file.path(destDir, inFile$name) )
@@ -183,12 +193,17 @@ server <- function(input, output, session) {
     'data_format=', as.character(input$input) ,' \n',
     'library=', as.character(input$library) ,' \n',
     'marker_type=', as.character(input$naming) ,' \n',
-    'READS_LENGHT=', as.character(input$reads) ,' \n'
+    'READS_LENGHT=', as.character(input$reads) ,' \n',
+    'id=', as.character(code) ,' \n',
+    'directory_name=',directory, '\n',
+    'cell=',input$cell_n
+    
     )
     
-    writeLines(conf, file.path(paste0('../../projects/',as.character(input$project_name), '_', as.character(input$user), '_', as.character(code)), "config"))
     
-    x <- paste('path_to_variables=', file.path(paste0('../../projects/',as.character(input$project_name), '_', as.character(input$user), '_', as.character(code)), "config"))
+    writeLines(conf, file.path(paste0('../../projects/',directory, "config")))
+    
+    x <- paste('path_to_variables=', file.path(paste0('../../projects/',directory, "config")))
 
     system(x)
     
@@ -218,10 +233,7 @@ server <- function(input, output, session) {
   
 
   
-  session$onSessionEnded(function() {
-    stopApp()
-  })
-  
+ 
 }
 
 
