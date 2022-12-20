@@ -1,4 +1,4 @@
-#Dockerfile for JSEQ_scRNAseq pipeline 
+#Dockerfile for JSEQ_server pipeline 
 FROM ubuntu:20.04
 
 WORKDIR /app
@@ -9,7 +9,7 @@ ENV LANG en_US.utf8
 RUN apt-get update
 RUN apt-get install -y sudo
 RUN sudo apt-get install -y git
-RUN git clone https://github.com/jkubis96/JSEQ_scRNAseq.git --branch v2.3.1
+RUN git clone https://github.com/jkubis96/JSEQ_server.git
 
 RUN sudo apt-get update
 
@@ -58,8 +58,8 @@ RUN sudo apt-get -y install r-cran-gridextra
 RUN sudo apt-get update
 
 
-RUN chmod +rwx $(pwd)/JSEQ_scRNAseq/setup/r_req.R 
-RUN sudo -i Rscript $(pwd)/JSEQ_scRNAseq/setup/r_req.R 
+RUN chmod +rwx $(pwd)/JSEQ_server/setup/r_req.R 
+RUN sudo -i Rscript $(pwd)/JSEQ_server/setup/r_req.R 
 
 
 RUN sudo apt -y install default-jdk
@@ -69,14 +69,14 @@ RUN sudo apt-get update
 RUN sudo apt-get install -y samtools
 
 
-RUN cd JSEQ_scRNAseq/setup \
+RUN cd JSEQ_server/setup \
 	&& wget http://archive.ubuntu.com/ubuntu/pool/universe/r/rna-star/rna-star_2.7.3a+dfsg-1build2_amd64.deb \
 	&& sudo dpkg -i rna-star_2.7.3a+dfsg-1build2_amd64.deb \
 	&& rm rna-star_2.7.3a+dfsg-1build2_amd64.deb
 	
 
 
-RUN cd JSEQ_scRNAseq/setup \
+RUN cd JSEQ_server/setup \
 	&& wget http://archive.ubuntu.com/ubuntu/pool/universe/f/fastp/fastp_0.20.0+dfsg-1build1_amd64.deb \
 	&& sudo dpkg -i fastp_0.20.0+dfsg-1build1_amd64.deb \
 	&& rm fastp_0.20.0+dfsg-1build1_amd64.deb
@@ -84,7 +84,7 @@ RUN cd JSEQ_scRNAseq/setup \
 
 
 RUN sudo apt-get update
-RUN cd JSEQ_scRNAseq/setup \
+RUN cd JSEQ_server/setup \
 	&& wget -O DropSeq.zip https://github.com/broadinstitute/Drop-seq/releases/download/v2.4.0/Drop-seq_tools-2.4.0.zip \
 	&& unzip DropSeq \
 	&& mv Drop-seq_tools-2.4.0 DropSeq \
@@ -95,37 +95,37 @@ RUN cd JSEQ_scRNAseq/setup \
 
 RUN sudo apt-get update -y
 
-RUN sudo chmod +rwx $(pwd)/JSEQ_scRNAseq/scripts/analysis_mix
-RUN sudo chmod +rwx $(pwd)/JSEQ_scRNAseq/scripts/analysis_species
-RUN sudo chmod +rwx $(pwd)/JSEQ_scRNAseq/scripts/converter.R
-RUN sudo chmod +rwx $(pwd)/JSEQ_scRNAseq/scripts/functions.R
-RUN sudo chmod +rwx $(pwd)/JSEQ_scRNAseq/scripts/genome_indexing
-RUN sudo chmod +rwx $(pwd)/JSEQ_scRNAseq/scripts/merge_genome.py
-RUN sudo chmod +rwx $(pwd)/JSEQ_scRNAseq/scripts/project_selection
-RUN sudo chmod +rwx $(pwd)/JSEQ_scRNAseq/scripts/projects
-RUN sudo chmod +rwx $(pwd)/JSEQ_scRNAseq/scripts/report_mix.Rmd
-RUN sudo chmod +rwx $(pwd)/JSEQ_scRNAseq/scripts/report_species.Rmd
-RUN sudo chmod +rwx $(pwd)/JSEQ_scRNAseq/scripts/report_mix_manual.Rmd
-RUN sudo chmod +rwx $(pwd)/JSEQ_scRNAseq/scripts/report_species_manual.Rmd
-RUN sudo chmod +rwx $(pwd)/JSEQ_scRNAseq/scripts/rna_metrics.R
-RUN sudo chmod +rwx $(pwd)/JSEQ_scRNAseq/scripts/seurat_analysis
-RUN sudo chmod +rwx $(pwd)/JSEQ_scRNAseq/scripts/seurat_cluster_mix.R
-RUN sudo chmod +rwx $(pwd)/JSEQ_scRNAseq/scripts/seurat_cluster_species.R
-RUN sudo chmod +rwx $(pwd)/JSEQ_scRNAseq/scripts/rna_metrics.R
-RUN sudo chmod +rwx $(pwd)/JSEQ_scRNAseq/scripts/add_tags.py
-RUN sudo chmod +rwx $(pwd)/JSEQ_scRNAseq/scripts/manual_species.R
-RUN sudo chmod +rwx $(pwd)/JSEQ_scRNAseq/scripts/manual_mix.R
+RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/analysis_mix
+RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/analysis_species
+RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/converter.R
+RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/functions.R
+RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/genome_indexing
+RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/merge_genome.py
+RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/project_selection
+RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/projects
+RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/report_mix.Rmd
+RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/report_species.Rmd
+RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/report_mix_manual.Rmd
+RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/report_species_manual.Rmd
+RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/rna_metrics.R
+RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/seurat_analysis
+RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/seurat_cluster_mix.R
+RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/seurat_cluster_species.R
+RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/rna_metrics.R
+RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/add_tags.py
+RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/manual_species.R
+RUN sudo chmod +rwx $(pwd)/JSEQ_server/scripts/manual_mix.R
 
-RUN mkdir $(pwd)/JSEQ_scRNAseq/projects
-RUN sudo chmod +rwx $(pwd)/JSEQ_scRNAseq/projects
-RUN mkdir $(pwd)/JSEQ_scRNAseq/results
-RUN sudo chmod +rwx $(pwd)/JSEQ_scRNAseq/results
+RUN mkdir $(pwd)/JSEQ_server/projects
+RUN sudo chmod +rwx $(pwd)/JSEQ_server/projects
+RUN mkdir $(pwd)/JSEQ_server/results
+RUN sudo chmod +rwx $(pwd)/JSEQ_server/results
 
 
-WORKDIR /app/JSEQ_scRNAseq
+WORKDIR /app/JSEQ_server
 
-RUN chmod +rwx $(pwd)/JSEQ_scRNAseq/run.R
-RUN sudo -i Rscript $(pwd)/JSEQ_scRNAseq/run.R
+RUN chmod +rwx $(pwd)/run.R
+RUN sudo -i Rscript $(pwd)/run.R
 
 
 
