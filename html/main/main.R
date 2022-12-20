@@ -188,14 +188,19 @@ server <- function(input, output, session) {
     
     writeLines(conf, file.path(paste0('../../projects/',as.character(input$project_name), '_', as.character(input$user), '_', as.character(code)), "config"))
     
-    x <- paste('source', file.path(paste0('../../projects/',as.character(input$project_name), '_', as.character(input$user), '_', as.character(code)), "config"))
+    x <- paste('path_to_variables=', file.path(paste0('../../projects/',as.character(input$project_name), '_', as.character(input$user), '_', as.character(code)), "config"))
 
     system(x)
     
-    y <- paste('cd ../.. ./scripts/run_analysis')
+    # y <- paste('source $(pwd)/setup/docker_id
+    #             id=$id
+    #             docker run --privileged --rm -it --env-file ', file.path(paste0('../../projects/',as.character(input$project_name), '_', as.character(input$user), '_', as.character(code)), "config") ,' -v $(pwd):/app/JSEQ_server $id')
+
+    
+    y <- './../../docker_init'
     
     system(y)
-    
+
   })
   
   observeEvent(input$check, {

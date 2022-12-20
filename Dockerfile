@@ -104,8 +104,8 @@ RUN sudo chmod +rwx $(pwd)/JSEQ_server/results
 
 WORKDIR /app/JSEQ_server
 
-RUN chmod +rwx $(pwd)/run.R
-RUN sudo -i Rscript $(pwd)/run.R $(pwd)
+CMD $(pwd)/scripts/run_analysis
+
 
 
 

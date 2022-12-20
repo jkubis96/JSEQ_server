@@ -42,6 +42,8 @@ then
 		echo -e "\033[1;33m Check $project_name_mode for the results (REPORT). If you don't see the REPORT file, so check process.log file for some errors"
 		echo ''
 		
+		exit
+		
 elif	[[ $species  == 'human' && $data_format  == 'matrix' ]] || [[ $species  == 'mice' && $data_format  == 'matrix' ]] || [[ $species  == 'custom' && $data_format  == 'matrix' ]] || [[ $species  == 'human' && $data_format  == 'sparse' ]] || [[ $species  == 'mice' && $data_format  == 'sparse' ]] || [[ $species  == 'custom' && $data_format  == 'sparse' ]]
 then
 
@@ -65,6 +67,8 @@ else
         echo ''
 		echo -e "\033[0;31m Experiment failed - check all the data from project"
 		echo ''
+		
+		exit
 		
 fi
 }
