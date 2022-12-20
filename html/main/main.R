@@ -201,9 +201,9 @@ server <- function(input, output, session) {
     )
     
     
-    writeLines(conf, file.path(paste0('../../projects/',directory, "config")))
+    writeLines(conf, file.path(paste0('../../projects/',directory, "/config")))
     
-    x <- paste('path_to_variables=', file.path(paste0('../../projects/',directory, "config")))
+    x <- paste('path_to_variables=', file.path(paste0('../../projects/',directory, "/config")))
 
     system(x)
     
