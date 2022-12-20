@@ -21,6 +21,6 @@ sudo docker build -t jseq -f Dockerfile .
 id=$(docker images --format "{{.ID}}" jseq)
 echo $id
 echo id=$id > $(pwd)/setup/docker_id
-sudo docker run --privileged --rm -it -v $(pwd):/app/JSEQ_server $id
+
 
 
