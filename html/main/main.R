@@ -1,8 +1,3 @@
-# install.packages("shinydashboard")
-# install.packages('blastula')
-
-
-
 library(shiny)
 library(shinydashboard)
 library(shinyvalidate)
