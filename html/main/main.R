@@ -157,7 +157,7 @@ server <- function(input, output, session) {
                        'tissue=', as.character(input$tissue), '_',
                        'tissue_affiliation=', as.character(input$affiliation), '_',
                        'cell_disease_status=', as.character(input$status), '_',
-                       'cell_development_status=', as.character(input$development) , '_')
+                       'cell_development_status=', as.character(input$development))
     
     
     dir.create(file.path( paste0('../../projects/',directory )))
@@ -194,7 +194,7 @@ server <- function(input, output, session) {
     'library=', as.character(input$library) ,' \n',
     'marker_type=', as.character(input$naming) ,' \n',
     'READS_LENGHT=', as.character(input$reads) ,' \n',
-    'id=', as.character(code) ,' \n',
+    'id=', as.character(code) ,'\n',
     'directory_name=',directory, '\n',
     'cell=',input$cell_n
     
