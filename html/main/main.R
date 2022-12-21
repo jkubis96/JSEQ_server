@@ -166,9 +166,9 @@ server <- function(input, output, session) {
     
     
     if (input$input == 'fastq') {
-      dir.create(file.path(paste0('../../projects/',directory, '/fasta' )))
+      dir.create(file.path(paste0('../../projects/',directory, '/fast_data' )))
       
-      destDir <- file.path(paste0('../../projects/',directory, '/fasta' ))
+      destDir <- file.path(paste0('../../projects/',directory, '/fast_data' ))
      
       inFile <- input$files
       file.copy( inFile$datapath, file.path(destDir, inFile$name) )
