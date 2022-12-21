@@ -5,11 +5,11 @@ echo -e '\033[1;36m $(date) Start counts / expression analysis'
 
 data=1
 
-PATH_PROJECT=$(pwd)/projects/$project_name
+PATH_PROJECT=$(pwd)/projects/$directory_name
 MARKERS=$marker_path
 
 SCRIPTS_EXTRACT=$(pwd)/scripts
-Rscript $SCRIPTS_EXTRACT/seurat_cluster_species.R $PATH_PROJECT $MARKERS $species $project_name $data $cell
+Rscript $SCRIPTS_EXTRACT/seurat_cluster_species.R $PATH_PROJECT $MARKERS $species $directory_name $data $cell
 
 cp $SCRIPTS_EXTRACT/manual_species.R $PATH_PROJECT/results
 mv $PATH_PROJECT/results/manual_species.R $PATH_PROJECT/results/manual_analysis.R 

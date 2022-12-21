@@ -63,11 +63,7 @@ elif [[ $s == 'q' ]]
 then
         exit
 		
-else
-		echo ''
-		echo -e "\033[0;31m Experiment failed - check all the data from project"
-		echo ''
-		start
+
 fi
 }
 

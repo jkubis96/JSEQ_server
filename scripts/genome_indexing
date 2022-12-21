@@ -72,6 +72,23 @@ then
 		rna_intervals
 		
 		echo -e "\033[0;32m $(date) Process DONE!"
+		
+		for READS_LENGHT in {75 100 150 200 250 300};	
+		do	
+				
+		mkdir -p genome/$species/index/$READS_LENGHT 
+		cpu=$(grep -c ^processor /proc/cpuinfo)
+		cpu=$cpu-2
+		DIR=$(pwd)/genome/$species/index/$READS_LENGHT 
+		GENOME=$(pwd)/genome/$species
+		lenght=$READS_LENGHT
+
+		mem=$(($(getconf _PHYS_PAGES) * $(getconf PAGE_SIZE) / (1024 * 1024)))
+		mem=$[$mem * 1000000]
+
+		STAR --runThreadN $cpu  --runMode genomeGenerate --genomeDir $DIR  --genomeFastaFiles $GENOME/*.fa  --sjdbGTFfile $GENOME/correct_annotation.gtf --limitGenomeGenerateRAM $mem --sjdbOverhang $lenght
+
+		done; 
 
 		
 		
@@ -101,6 +118,23 @@ then
 		rna_intervals
 		
 		echo -e "\033[0;32m $(date) Process DONE!"
+		
+		for READS_LENGHT in {75 100 150 200 250 300};	
+		do	
+				
+		mkdir -p genome/$species/index/$READS_LENGHT 
+		cpu=$(grep -c ^processor /proc/cpuinfo)
+		cpu=$cpu-2
+		DIR=$(pwd)/genome/$species/index/$READS_LENGHT 
+		GENOME=$(pwd)/genome/$species
+		lenght=$READS_LENGHT
+
+		mem=$(($(getconf _PHYS_PAGES) * $(getconf PAGE_SIZE) / (1024 * 1024)))
+		mem=$[$mem * 1000000]
+
+		STAR --runThreadN $cpu  --runMode genomeGenerate --genomeDir $DIR  --genomeFastaFiles $GENOME/*.fa  --sjdbGTFfile $GENOME/correct_annotation.gtf --limitGenomeGenerateRAM $mem --sjdbOverhang $lenght
+
+		done; 
 
 
 start
@@ -131,6 +165,24 @@ then
 		rna_intervals
 		
 		echo -e "\033[0;32m $(date) Process DONE!"
+		
+		
+		for READS_LENGHT in {75 100 150 200 250 300};	
+		do	
+				
+		mkdir -p genome/$species/index/$READS_LENGHT 
+		cpu=$(grep -c ^processor /proc/cpuinfo)
+		cpu=$cpu-2
+		DIR=$(pwd)/genome/$species/index/$READS_LENGHT 
+		GENOME=$(pwd)/genome/$species
+		lenght=$READS_LENGHT
+
+		mem=$(($(getconf _PHYS_PAGES) * $(getconf PAGE_SIZE) / (1024 * 1024)))
+		mem=$[$mem * 1000000]
+
+		STAR --runThreadN $cpu  --runMode genomeGenerate --genomeDir $DIR  --genomeFastaFiles $GENOME/*.fa  --sjdbGTFfile $GENOME/correct_annotation.gtf --limitGenomeGenerateRAM $mem --sjdbOverhang $lenght
+
+		done; 
 
 		
 start
@@ -138,78 +190,4 @@ start
 fi
 
 }
-
-
-
-function index_file {
-
-index_files=$(pwd)/genome/$species/index/*
-
-
-for i in $index_files
-do
-r=$(basename $i)
-if [[ $r == $READS_LENGHT ]]
-then
-
-check_index=$READS_LENGHT
-
-
-fi
-done
-
-}
-
-function INDEXING {
-
-index_file
-
-echo ''
-echo -e "\033[0;34m $(date) Genome indexing start..."
-echo ''
-
-
-if [[ $check_index != $READS_LENGHT ]]
-then
-
-echo ''
-echo -e "\033[0;34m Start indexing"
-echo ''
-
-mkdir -p genome/$species/index/$READS_LENGHT 
-cpu=$(grep -c ^processor /proc/cpuinfo)
-cpu=$cpu-2
-DIR=$(pwd)/genome/$species/index/$READS_LENGHT 
-GENOME=$(pwd)/genome/$species
-lenght=$READS_LENGHT
-
-mem=$(($(getconf _PHYS_PAGES) * $(getconf PAGE_SIZE) / (1024 * 1024)))
-mem=$[$mem * 1000000]
-
-STAR --runThreadN $cpu  --runMode genomeGenerate --genomeDir $DIR  --genomeFastaFiles $GENOME/*.fa  --sjdbGTFfile $GENOME/correct_annotation.gtf --limitGenomeGenerateRAM $mem --sjdbOverhang $lenght
-
-echo -e "\033[0;32m $(date) Genome indexing done"
-
-
-echo ''
-echo ''
-
-start
-
-elif [[ $check_index == $READS_LENGHT ]]
-then	
-	
-echo ''
-echo -e "\033[0;34m Index' $READS_LENGHT 'for' $species 'already exist"
-echo -e "\033[0;34m You can run analysis"
-echo ''
-
-species=
-
-start
-
-fi
-
-}
-
 

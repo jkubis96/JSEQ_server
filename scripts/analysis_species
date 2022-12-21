@@ -1,5 +1,113 @@
 #!/bin/bash 
 
+###############################
+
+function merge_fq {
+ 
+
+fq=$(pwd)/projects/$directory_name/fast_data/*.fastq.gz
+for i in $fq;
+do
+if      [[ $i == *"R1"* ]];
+then
+		r1+=$(basename $i)' '
+elif 	[[ $i == *"R2"* ]];
+then
+		r2+=$(basename $i)' '
+fi
+done;
+
+cd projects/$directory_name/fast_data
+cat $r1 > input_R1.fastq.gz
+cat $r2 > input_R2.fastq.gz
+rm $r1 $r2
+
+r1=
+r2=
+
+cd ..
+cd ..
+cd ..
+
+}
+
+
+
+
+function checkseurat {
+		
+		
+		fast=$(pwd)/projects/$directory_name/sc_data/*
+	
+for i in $fast;
+do
+		r+=$i
+done; 		
+		
+if      [[ $r == *".tsv"* ]]
+then
+
+        echo  -e '\033[1;36m $(date) Data converting'
+	
+	format=tsv
+	con=NULL
+	null=NULL
+	converter=$(pwd)/scripts/converter.R
+	Rscript $converter $format $(pwd)/projects/$directory_name/sc_data/ $(basename $r) $null $con
+	
+	
+		echo ''
+		echo -e "\033[0;32m Project done"
+		echo -e "\033[0;32m Start analysis"
+		echo ''
+
+
+	
+elif     [[ $r == *".csv"* ]] 
+then
+        echo  -e '\033[1;36m $(date) Data converting'
+	
+	format=csv
+	con=NULL
+	null=NULL
+	converter=$(pwd)/scripts/converter.R
+	Rscript $converter $format $(pwd)/projects/$directory_name/sc_data/ $(basename $r) $null $con
+	
+		echo ''
+		echo -e "\033[0;32m Project done"
+		echo -e "\033[0;32m Start analysis"
+		echo ''
+	
+	
+	
+elif    [[ $r == *".txt"* ]]
+then
+        
+		echo  -e '\033[1;36m $(date) Data converting'
+		
+	format=txt
+	con=NULL
+	null=NULL
+	converter=$(pwd)/scripts/converter.R
+	Rscript $converter $format $(pwd)/projects/$directory_name/sc_data/ $(basename $r) $null $con
+		
+		echo ''
+		echo -e "\033[0;32m Project done"
+		echo -e "\033[0;32m Start analysis"
+		echo ''
+	
+	
+		
+		
+fi
+
+	
+		
+}
+
+
+###############################
+
 function TRIMMING {
 
 echo Trimming Start
@@ -23,10 +131,10 @@ barcode_length=$barcode_length
 
 
 
-RESULT=$(pwd)/projects/$project_name/results/
+RESULT=$(pwd)/projects/$directory_name/results/
 ADAPTERS=$(pwd)/requirements_file/Adapters.fa
-INFASTP=$(pwd)/projects/$project_name/fast_data
-CHECK=$(pwd)/projects/$project_name
+INFASTP=$(pwd)/projects/$directory_name/fast_data
+CHECK=$(pwd)/projects/$directory_name
 
 if ! [[ -f $CHECK/fast_data/R1_out_exctracted.fastq.gz || -f $CHECK/sc_data/matrix.mtx ]];
 then
@@ -80,7 +188,7 @@ fi
 
 function whitelist {
 
-CHECK=$(pwd)/projects/$project_name
+CHECK=$(pwd)/projects/$directory_name
 
 if ! [[ -f $CHECK/tmp/whitelist_barcodes.csv || -f $CHECK/sc_data/matrix.mtx ]];
 then
@@ -106,9 +214,9 @@ fi
 	barcode_length=$barcode_length
 	barcode=$barcode
 
-	INFASTP=$(pwd)/projects/$project_name/fast_data
-	tmp=$(pwd)/projects/$project_name/tmp
-	RESULT=$(pwd)/projects/$project_name/results/
+	INFASTP=$(pwd)/projects/$directory_name/fast_data
+	tmp=$(pwd)/projects/$directory_name/tmp
+	RESULT=$(pwd)/projects/$directory_name/results/
 
 #zmienione
 
@@ -129,7 +237,7 @@ fi
 	done;
 
 
-	cd $(pwd)/projects/$project_name/fast_data
+	cd $(pwd)/projects/$directory_name/fast_data
 	umi_tools whitelist --stdin $R1_NAME_out --bc-pattern=$barcode --extract-method=regex --set-cell-number=$cell --subset-reads 1000000000 --error-correct-threshold=2  --ed-above-threshold=correct --plot-prefix=$RESULT/expect_whitelist --log2stderr > $tmp/whitelist.csv ;
 	umi_tools extract --bc-pattern=$barcode --extract-method=regex --stdin=$R1_NAME_out --stdout=R1_out_exctracted.fastq.gz --read2-in=$R2_NAME_out --read2-out=R2_out_extracted.fastq.gz --error-correct-cell --subset-reads 1000000000 --reconcile-pairs  --whitelist=$tmp/whitelist.csv
 	gunzip R2_out_extracted.fastq.gz
@@ -163,18 +271,18 @@ function STAR_MAPPING {
 
 echo Mapping Start
 
-CHECK=$(pwd)/projects/$project_name
+CHECK=$(pwd)/projects/$directory_name
 
 if ! [[ -f $CHECK/tmp/Aligned.out.bam || -f $CHECK/sc_data/matrix.mtx ]];
 then
 
 
-	RESULT=$(pwd)/projects/$project_name/results/
-	INFASTP=$(pwd)/projects/$project_name/fast_data
+	RESULT=$(pwd)/projects/$directory_name/results/
+	INFASTP=$(pwd)/projects/$directory_name/fast_data
 	cpu=$(grep -c ^processor /proc/cpuinfo)
 	cpu=$[$cpu-2]
 	DIR=$(pwd)/genome/$species/index/$READS_LENGHT 
-	tmp=$(pwd)/projects/$project_name/tmp/
+	tmp=$(pwd)/projects/$directory_name/tmp/
 
 
 
@@ -209,7 +317,7 @@ fi
 
 function add_tags {
 
-CHECK=$(pwd)/projects/$project_name
+CHECK=$(pwd)/projects/$directory_name
 
 if ! [[ -f $CHECK/tmp/final.bam || -f $CHECK/sc_data/matrix.mtx ]];
 then
@@ -235,7 +343,7 @@ fi
 	barcode_length=$barcode_length
 	barcode=$barcode
 
-	tmp=$(pwd)/projects/$project_name/tmp
+	tmp=$(pwd)/projects/$directory_name/tmp
 
 	samtools view -h $tmp/*.out.bam | sed 's/_/XC:Z:/' | grep -oE "XC:Z:[acgtnACGTN-]+" > $tmp/barcodes.sam
 	samtools view -h $tmp/*.out.bam | sed 's/_/XC:Z:/' | sed 's/_/XM:Z:/' | grep -oE "XM:Z:[acgtnACGTN-]+" > $tmp/umis.sam
@@ -258,15 +366,15 @@ fi
 
 function dropSEQ {
 
-CHECK=$(pwd)/projects/$project_name
+CHECK=$(pwd)/projects/$directory_name
 
 if ! [[ -f $CHECK/tmp/gene_exon_tagged.bam || -f $CHECK/sc_data/matrix.mtx ]];
 then
 
 	SCRIPTS_EXTRACT=$(pwd)/setup
 	java -jar $SCRIPTS_EXTRACT/DropSeq/jar/dropseq.jar TagReadWithGeneFunction \
-			INPUT=$(pwd)/projects/$project_name/tmp/final.bam \
-			OUTPUT=$(pwd)/projects/$project_name/tmp/gene_exon_tagged.bam \
+			INPUT=$(pwd)/projects/$directory_name/tmp/final.bam \
+			OUTPUT=$(pwd)/projects/$directory_name/tmp/gene_exon_tagged.bam \
 			ANNOTATIONS_FILE=$(pwd)/genome/$species/correct_annotation.refFlat 
 		
 else 
@@ -280,7 +388,7 @@ fi
 
 function final_exon {
 
-CHECK=$(pwd)/projects/$project_name
+CHECK=$(pwd)/projects/$directory_name
 
 if ! [[ -f $CHECK/tmp/gene_exon_tagged_error.bam || -f $CHECK/sc_data/matrix.mtx ]];
 then
@@ -289,10 +397,10 @@ then
 
 	SCRIPTS_EXTRACT=$(pwd)/setup
 	java -jar $SCRIPTS_EXTRACT/DropSeq/jar/dropseq.jar DetectBeadSubstitutionErrors \
-			I=$(pwd)/projects/$project_name/tmp/gene_exon_tagged.bam \
-			O=$(pwd)/projects/$project_name/tmp/gene_exon_tagged_error.bam \
-			OUTPUT_REPORT=$(pwd)/projects/$project_name/tmp/beadSubstitutionReport.txt \
-			OUTPUT_SUMMARY=$(pwd)/projects/$project_name/tmp/beadSubstitutionSummary.txt \
+			I=$(pwd)/projects/$directory_name/tmp/gene_exon_tagged.bam \
+			O=$(pwd)/projects/$directory_name/tmp/gene_exon_tagged_error.bam \
+			OUTPUT_REPORT=$(pwd)/projects/$directory_name/tmp/beadSubstitutionReport.txt \
+			OUTPUT_SUMMARY=$(pwd)/projects/$directory_name/tmp/beadSubstitutionSummary.txt \
 			NUM_THREADS=$cpu
 else 
 
@@ -307,12 +415,12 @@ function completed_bam {
 
 
 
-CHECK=$(pwd)/projects/$project_name
+CHECK=$(pwd)/projects/$directory_name
 
 if ! [[ -f $CHECK/results/Completed.bam || -f $CHECK/sc_data/matrix.mtx ]];
 then
 
-	tmp=$(pwd)/projects/$project_name/tmp
+	tmp=$(pwd)/projects/$directory_name/tmp
 	cell=`cat $tmp/whitelist_barcodes.csv  | wc -l`
 
 	cpu=$(grep -c ^processor /proc/cpuinfo)
@@ -323,10 +431,10 @@ then
 
 	SCRIPTS_EXTRACT=$(pwd)/setup
 	java -jar $SCRIPTS_EXTRACT/DropSeq/jar/dropseq.jar DetectBeadSynthesisErrors \
-			INPUT=$(pwd)/projects/$project_name/tmp/gene_exon_tagged_error.bam \
-			OUTPUT=$(pwd)/projects/$project_name/results/Completed.bam \
-			OUTPUT_STATS=$(pwd)/projects/$project_name/tmp/synthesis_stats.txt \
-			SUMMARY=$(pwd)/projects/$project_name/tmp/synthesis_stats_summary.txt \
+			INPUT=$(pwd)/projects/$directory_name/tmp/gene_exon_tagged_error.bam \
+			OUTPUT=$(pwd)/projects/$directory_name/results/Completed.bam \
+			OUTPUT_STATS=$(pwd)/projects/$directory_name/tmp/synthesis_stats.txt \
+			SUMMARY=$(pwd)/projects/$directory_name/tmp/synthesis_stats_summary.txt \
 			NUM_BARCODES=$[$cell*1,25] \
 			PRIMER_SEQUENCE=$smart \
 			NUM_THREADS=$cpu
@@ -344,12 +452,12 @@ fi
 ##EXPRESSION FILE AND STATS
 function umi_extract {
 
-CHECK=$(pwd)/projects/$project_name
+CHECK=$(pwd)/projects/$directory_name
 
 if ! [[ -f $CHECK/tmp/selected_cells.sc || -f $CHECK/sc_data/matrix.mtx ]];
 then
-	tmp=$(pwd)/projects/$project_name/tmp
-	results=$(pwd)/projects/$project_name/results
+	tmp=$(pwd)/projects/$directory_name/tmp
+	results=$(pwd)/projects/$directory_name/results
 	
 	samtools view $results/Completed.bam | grep -oE "XC:Z:[acgtnACGTN-]+" > $tmp/repaired_barcodes.sam
 	cat $tmp/repaired_barcodes.sam | sort | uniq -c | sort -nr | sed 's/XC:Z:/\t/' > $tmp/barcode_stat.txt
@@ -366,22 +474,22 @@ fi
 
 function umi_expression {
 
-CHECK=$(pwd)/projects/$project_name
+CHECK=$(pwd)/projects/$directory_name
 
 if ! [[ -f $CHECK/tmp/umi_expression.tsv || -f $CHECK/sc_data/matrix.mtx ]];
 then
 
 	SCRIPTS_EXTRACT=$(pwd)/setup
 	java -jar $SCRIPTS_EXTRACT/DropSeq/jar/dropseq.jar DigitalExpression \
-			I=$(pwd)/projects/$project_name/results/Completed.bam \
-			O=$(pwd)/projects/$project_name/tmp/umi_expression.tsv \
+			I=$(pwd)/projects/$directory_name/results/Completed.bam \
+			O=$(pwd)/projects/$directory_name/tmp/umi_expression.tsv \
 			EDIT_DISTANCE=2 \
-			OUTPUT_LONG_FORMAT=$(pwd)/projects/$project_name/tmp/umi_expression.long \
+			OUTPUT_LONG_FORMAT=$(pwd)/projects/$directory_name/tmp/umi_expression.long \
 			STRAND_STRATEGY=BOTH\
 			OUTPUT_READS_INSTEAD=false\
 			LOCUS_FUNCTION_LIST={INTERGENIC,INTRONIC,UTR,CODING,RIBOSOMAL}\
 			MIN_BC_READ_THRESHOLD=0\
-			CELL_BC_FILE=$(pwd)/projects/$project_name/tmp/selected_cells.sc
+			CELL_BC_FILE=$(pwd)/projects/$directory_name/tmp/selected_cells.sc
 			
 else 
 
@@ -395,17 +503,17 @@ fi
 
 function scRNAmetrics {
 
-CHECK=$(pwd)/projects/$project_name
+CHECK=$(pwd)/projects/$directory_name
 
 if ! [[ -f $CHECK/tmp/scRNAmetrics.txt || -f $CHECK/sc_data/matrix.mtx ]];
 then
 
 	SCRIPTS_EXTRACT=$(pwd)/setup
 	java -jar $SCRIPTS_EXTRACT/DropSeq/jar/dropseq.jar SingleCellRnaSeqMetricsCollector \
-			INPUT=$(pwd)/projects/$project_name/results/Completed.bam\
-			OUTPUT=$(pwd)/projects/$project_name/results/scRNAmetrics.txt\
+			INPUT=$(pwd)/projects/$directory_name/results/Completed.bam\
+			OUTPUT=$(pwd)/projects/$directory_name/results/scRNAmetrics.txt\
 			ANNOTATIONS_FILE=$(pwd)/genome/$species/correct_annotation.refFlat \
-			CELL_BC_FILE=$(pwd)/projects/$project_name/tmp/selected_cells.sc \
+			CELL_BC_FILE=$(pwd)/projects/$directory_name/tmp/selected_cells.sc \
 			RIBOSOMAL_INTERVALS=$(pwd)/genome/$species/annotation.rRNA.intervals
         
 else 
@@ -419,13 +527,13 @@ fi
 
 function metric_plot {
 
-CHECK=$(pwd)/projects/$project_name/sc_data
+CHECK=$(pwd)/projects/$directory_name/sc_data
 
 if ! [[ -f $CHECK/matrix.mtx ]];
 then
 
-	path_metric=$(pwd)/projects/$project_name/results
-	path_result=$(pwd)/projects/$project_name/results
+	path_metric=$(pwd)/projects/$directory_name/results
+	path_result=$(pwd)/projects/$directory_name/results
 
 	SCRIPTS_EXTRACT=$(pwd)/scripts
 
@@ -444,14 +552,14 @@ fi
 
 function convert_mtx_umi {
 
-CHECK=$(pwd)/projects/$project_name/sc_data
+CHECK=$(pwd)/projects/$directory_name/sc_data
 
 if ! [[ -f $CHECK/matrix.mtx ]];
 then
 
-	path_convert=$(pwd)/projects/$project_name/sc_data
+	path_convert=$(pwd)/projects/$directory_name/sc_data
 	mkdir -p $path_convert
-	path_tmp_mtx=$(pwd)/projects/$project_name/tmp
+	path_tmp_mtx=$(pwd)/projects/$directory_name/tmp
 
 	format=tsv
 	con=raw
@@ -470,17 +578,17 @@ fi
 
 function seurat {
 
-PATH_PROJECT=$(pwd)/projects/$project_name
+PATH_PROJECT=$(pwd)/projects/$directory_name
 MARKERS=$marker_path
 data=3
 
 SCRIPTS_EXTRACT=$(pwd)/scripts
-Rscript $SCRIPTS_EXTRACT/seurat_cluster_species.R $PATH_PROJECT $MARKERS $species $project_name $data $cell
+Rscript $SCRIPTS_EXTRACT/seurat_cluster_species.R $PATH_PROJECT $MARKERS $species $directory_name $data $cell
 
 cp $SCRIPTS_EXTRACT/manual_species.R $PATH_PROJECT/results
 mv $PATH_PROJECT/results/manual_species.R $PATH_PROJECT/results/manual_analysis.R 
 
-CHECK=$(pwd)/projects/$project_name/sc_data
+CHECK=$(pwd)/projects/$directory_name/sc_data
 if [[ -f $CHECK/matrix.mtx ]];
 then	
 rm -rf $PATH_PROJECT/tmp
