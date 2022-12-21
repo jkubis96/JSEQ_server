@@ -167,7 +167,7 @@ then
 		echo -e "\033[0;32m $(date) Process DONE!"
 		
 		
-		for READS_LENGHT in 75 100 150 200 250 300; do echo $READS_LENGHT; done
+		for READS_LENGHT in 75 100 150 200 250 300;
 		do	
 				
 		mkdir -p genome/$species/index/$READS_LENGHT 
