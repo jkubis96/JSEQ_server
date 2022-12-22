@@ -2,8 +2,10 @@
 
 
 
-source ../../setup/docker_id
+source $(pwd)/setup/docker_id
 id=$id
-docker run --privileged --rm -it --env-file ./$path_to_variables -v $(pwd):/app/JSEQ_server $id
+
+
+docker run --privileged --rm -i --env-file ./$1 -v $(pwd):/app/JSEQ_server $id
 	
 	
