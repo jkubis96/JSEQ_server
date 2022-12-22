@@ -163,6 +163,8 @@ server <- function(input, output, session) {
     dir.create(file.path( paste0('../../projects/',directory )))
     dir.create(file.path( paste0('../../projects/',directory, '/sc_data'  )))
     dir.create(file.path(paste0('../../projects/',directory, '/results'  )))
+    dir.create(file.path(paste0('../../projects/',directory, '/tmp'  )))
+    
     
     
     if (input$input == 'fastq') {
