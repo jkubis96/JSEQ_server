@@ -207,7 +207,7 @@ server <- function(input, output, session) {
     writeLines(conf, file.path(paste0('../../projects/',directory, "/config")))
     
     
-    c = paste0('cd ../..; path_to_variables=',paste0('projects/',directory, '/config; ./docker_init $path_to_variables'))
+    c = paste0('echo' ,directory,' >> ../../tasks')
     
     system(c)
     
