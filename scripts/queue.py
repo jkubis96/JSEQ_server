@@ -12,7 +12,7 @@ def queueu(task_list_path, turn:str() = 'ON'):
                 tasks = f.read().splitlines()
             
             for task in tasks:
-                bashCommand = 'nohup ./docker_init $' + task + '/config &'
+                bashCommand = 'nohup ./docker_init projects/' + task + '/config &'
                 os.system(bashCommand)
                 tasks = tasks[tasks not in task]
                 try:
