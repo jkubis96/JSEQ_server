@@ -150,13 +150,13 @@ server <- function(input, output, session) {
       
     }
     
-    directory = paste0('project_name=', as.character(input$project_name), '_',
-                       'user=', as.character(input$user) , '_', 
-                       'id=', as.character(code) , '_',
-                       'species=', as.character(input$species), '_',
-                       'tissue=', as.character(input$tissue), '_',
-                       'tissue_affiliation=', as.character(input$affiliation), '_',
-                       'cell_disease_status=', as.character(input$status), '_',
+    directory = paste0('project_name=', as.character(input$project_name), '|',
+                       'user=', as.character(input$user) , '|', 
+                       'id=', as.character(code) , '|',
+                       'species=', as.character(input$species), '|',
+                       'tissue=', as.character(input$tissue), '|',
+                       'tissue_affiliation=', as.character(input$affiliation), '|',
+                       'cell_disease_status=', as.character(input$status), '|',
                        'cell_development_status=', as.character(input$development))
     
     
