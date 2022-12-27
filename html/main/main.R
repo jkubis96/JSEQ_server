@@ -150,14 +150,14 @@ server <- function(input, output, session) {
       
     }
     
-    directory = paste0('project_name-(', as.character(input$project_name), ')-',
-                       'user-(', as.character(input$user) , ')-', 
-                       'id-(', as.character(code) , ')-',
-                       'species-(', as.character(input$species), ')-',
-                       'tissue-(', as.character(input$tissue), ')-',
-                       'tissue_affiliation-(', as.character(input$affiliation), ')-',
-                       'cell_disease_status-(', as.character(input$status), ')-',
-                       'cell_development_status-(', as.character(input$development), ')')
+    directory = paste0('project_name-', as.character(input$project_name), '__',
+                       'user-', as.character(input$user) , '__', 
+                       'id-', as.character(code) , '__',
+                       'species-', as.character(input$species), '__',
+                       'tissue-', as.character(input$tissue), '__',
+                       'tissue_affiliation-', as.character(input$affiliation), '__',
+                       'cell_disease_status-', as.character(input$status), '__',
+                       'cell_development_status-', as.character(input$development))
     
     
     dir.create(file.path( paste0('../../projects/',directory )))
