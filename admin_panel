@@ -21,6 +21,7 @@ echo -e '\033[1;36m Choose JSEQ function:'
 echo -e '\033[1;36m -installation [install]'
 echo -e '\033[1;36m -start container [start]'
 echo -e '\033[1;36m -start queue [queue]'
+echo -e '\033[1;36m -run app [app]'
 echo -e '\033[1;36m -quit [q]'
 echo ''
 echo -e '\033[1;36m Choose function:'
@@ -64,6 +65,11 @@ elif [[ $s == 'queue' ]]
 then
 
 	nohup python3 $(pwd)/scripts/queue.py $(pwd)/tasks > nohup_log 2>&1 &
+	
+elif [[ $s == 'app' ]]
+then
+
+	nohup R -e "shiny::runApp('html/main/main.R', port = 1111, host = '127.0.0.1')" &	
 	
 	
 elif [[ $s == 'q' ]]

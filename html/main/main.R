@@ -207,7 +207,7 @@ server <- function(input, output, session) {
     writeLines(conf, file.path(paste0('../../projects/',directory, "/config")))
     
     
-    c = paste0('echo' ,directory,' >> ../../tasks')
+    c = paste0('echo "' ,directory,'" >> ../../tasks')
     
     system(c)
     
