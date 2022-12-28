@@ -2,6 +2,7 @@ library(shiny)
 library(shinydashboard)
 library(shinyvalidate)
 
+
 options(shiny.maxRequestSize = 300000*1024^2)
 
 t <- getwd()
@@ -135,7 +136,7 @@ server <- function(input, output, session) {
   
   observeEvent(input$start, {
     
-    
+      
     CHECK <- TRUE
     
     while(CHECK) {
@@ -210,7 +211,7 @@ server <- function(input, output, session) {
     c = paste0('echo "' ,directory,'" >> ../../tasks')
     
     system(c)
-    
+
     
   })
   
