@@ -12,6 +12,7 @@ ui <- dashboardPage(
   dashboardHeader(title = "JSEQ_scRNAseq"),
   dashboardSidebar(
     sidebarMenu(
+      id = "tabs",
       menuItem("Home", tabName = "home", icon = icon("home")),
       menuItem("Description", tabName = "description", icon = icon("book-open")),
       menuItem("Analysis", tabName = "analysis", icon = icon("calculator")),
@@ -116,7 +117,46 @@ ui <- dashboardPage(
               
       ),
       tabItem(tabName = "validate",
-              h2("Widgets tab content", align = "justify")
+              h2("Widgets tab content", align = "justify"),
+              
+              fluidRow(
+                
+                column(3,
+                       h4("Account & Project", align = "left"),
+                       textInput("user", "Username", 
+                                 value = ""),
+                       textInput("email", "E-mail", 
+                                 value = ""),
+                       textInput("project_name", "Project name", 
+                                 value = ""),
+                       textInput("description", "Short project description", 
+                                 value = ""),
+                       
+                       
+                ),
+                
+                column(3,
+                       h4("Data", align = "left"),
+                       textInput("source", "Data source", 
+                                 value = "https://"),
+                       selectInput("species", "Species", 
+                                   choices = list('human' = 'human', 'mouse' = 'mouse')),
+                       selectInput("tissue", "Tissue type", 
+                                   choices = list('bladder' = 'bladder', 'blood' = 'blood', 'blood vessels' = 'blood vessels',
+                                                  'bone marrow' = 'bone marrow', 'brain' = 'brain', 'eye' = 'eye',
+                                                  'gut' = 'gut', 'heart' = 'heart', 'kidney' = 'kidney', 'liver' = 'liver',
+                                                  'lung' = 'lung', 'pancreas' = 'pancreas', 'skin' = 'skin', 'stomach' = 'stomach',
+                                                  'organoids' = 'organoids', 'other' = 'other')),
+                       textInput("affiliation", "Tissue affiliation", 
+                                 value = "", placeholder = 'cortex, beta-cells, etc.'),
+                       
+                       selectInput("status", "Cells status", 
+                                   choices = list('healthy' = 'healthy', 'disease' = 'disease', 'unknow' = 'unknow')),
+                       
+                       selectInput("development", "Development status", 
+                                   choices = list('mature' = 'mature', 'development' = 'development', 'cell culture' = 'cell_culture')),
+                       
+                ))
               
               
       ),
@@ -211,6 +251,12 @@ server <- function(input, output, session) {
     c = paste0('echo "' ,directory,'" >> ../../tasks')
     
     system(c)
+    
+    newtab <- switch(input$tabs,
+                     "analysis" = "validate"
+    )
+    
+    updateTabItems(session, "tabs", newtab)
 
     
   })
