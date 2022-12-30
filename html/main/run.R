@@ -1,3 +1,3 @@
 library(shiny)
 
-runApp("../main/main.R", launch.browser = FALSE, port = 8001)
+runApp("main.R", launch.browser = TRUE, port = 8001)
