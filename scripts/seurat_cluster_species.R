@@ -60,10 +60,10 @@ args <- commandArgs()
 
 
 
-h5createFile("data.h5")
-h5createGroup("data.h5","markers")
-h5createGroup("data.h5","frames")   
-h5createGroup("data.h5","metadata") 
+h5createFile(file.path(path,  "data.h5"))
+h5createGroup(file.path(path,  "data.h5"),"markers")
+h5createGroup(file.path(path,  "data.h5"),"frames")   
+h5createGroup(file.path(path,  "data.h5"),"metadata") 
 
 ###########################################################################################################################################################
 
@@ -365,7 +365,7 @@ marker_df <- heterogenity_select(cells_wide_df = tmp, marker_df = top_sig, heter
 CSSG_df <- CSSG_markers(cells_wide_df = tmp, markers_df = marker_df$marker_df, max_combine = max_combine, loss_pval = loss_pval)
 hd_factors <- hd_cluster_factors(UMI, CSSG_df)
 
-h5write(CSSG_df, "data.h5","markers/CSSG")
+h5write(CSSG_df, file.path(path,  "data.h5"),"markers/CSSG")
 
 
 ###########################################################################################################################################################
@@ -415,7 +415,7 @@ print('Naming - DONE')
 ###########################################################################################################################################################
 
 colnames(average_expression) <- new.cluster.ids
-h5write(average_expression, "data.h5","frames/subclass_avg_norm_expression")
+h5write(average_expression, file.path(path,  "data.h5"),"frames/subclass_avg_norm_expression")
 
 
 #PCA plot and UMAP plot with names
@@ -460,7 +460,7 @@ marker_cell_names <- meta_data[c('cluster', 'subclass')] %>%
 
 subclasses_marker <- merge(subclasses_marker, marker_cell_names, by = 'cluster')
 
-h5write(subclasses_marker, "data.h5","markers/subclass_markers")
+h5write(subclasses_marker, file.path(path,  "data.h5"),"markers/subclass_markers")
 
 subclasses_marker_report <- merge(subclasses_marker_report, marker_cell_names, by = 'cluster')
 
@@ -520,13 +520,13 @@ meta_data <- merge(meta_data, idents_subtypes, by = 'idents')
 meta_data$subtypes[grep(pattern = 'BAD!', meta_data$subtypes)] <- '-'
 meta_data$subtypes[grep(pattern = 'Bad!', meta_data$subtypes)] <- '-'
 
-h5write(meta_data, "data.h5","metadata/cells_meta")
+h5write(meta_data, file.path(path,  "data.h5"),"metadata/cells_meta")
 
 
 exp_matrix <- GetAssayData(UMI, slot = 'data')
 colnames(exp_matrix) <- meta_data$idents
 
-h5write(exp_matrix, "data.h5","frames/normalized_wide_cell_data")
+h5write(exp_matrix, file.path(path,  "data.h5"),"frames/normalized_wide_cell_data")
 
 
 print('Checking - DONE')
@@ -578,7 +578,7 @@ if (length(unique(Idents(UMI))) != length(unique(UMI.subtypes$cluster))) {
 }
 
 subtypes_marker <- UMI.subtypes %>% group_by(cluster) %>% top_n(n = 1000, wt = avg_logFC)
-h5write(subtypes_marker, "data.h5","markers/subtypes_markers")
+h5write(subtypes_marker, file.path(path,  "data.h5"),"markers/subtypes_markers")
 
 subtypes_marker_report <- UMI.subtypes %>% group_by(cluster) %>% top_n(n = 10, wt = avg_logFC)
 write.table(subtypes_marker_report, file = file.path(OUTPUT, "subtypes_marker_report.csv"), sep = ',')
@@ -605,7 +605,7 @@ hd_map_plot <- plotly::ggplotly(DimPlotFactor(HDMAP))
 
 htmlwidgets::saveWidget(hd_map_plot, file.path(OUTPUT, "HDMAP_subtypes.html"))
 
-h5write(HDMAP, "data.h5","metadata/map_cordinates")
+h5write(HDMAP, file.path(path,  "data.h5"),"metadata/map_cordinates")
 
 
 
@@ -641,7 +641,7 @@ rm(average_expression)
 
 average_expression <- aggregation_chr(UMI)
 
-h5write(average_expression, "data.h5","frames/subtypes_avg_norm_expression")
+h5write(average_expression, file.path(path,  "data.h5"),"frames/subtypes_avg_norm_expression")
 
 
 ###########################################################################################################################################################
