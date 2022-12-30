@@ -21,6 +21,9 @@ args <- commandArgs()
   project_name <- args[9]
   data <- args[10]
   estimated_cells <- args[11]
+  tissue <- args[12]
+  cell_development_status <- args[13]
+  
   functions <- file.path(getwd(), 'scripts/functions.R')
   cssg <- file.path(getwd(), 'scripts/cssg.R')
   source(functions, local = T)
@@ -64,8 +67,18 @@ h5createGroup("data.h5","metadata")
 
 ###########################################################################################################################################################
 
-markers_class <- readxl::read_xlsx(markers, sheet = 1)
-markers_subclass <- readxl::read_xlsx(markers, sheet = 2, col_names = F)
+
+if (markers == 'canonical' && cell_development_status == 'mature' && file.exists(file.path(getwd(), 'requirements_file/markers', tissue, 'mature.xlsx'))) {
+  markers_class <- readxl::read_xlsx(file.path(getwd(), 'requirements_file/markers', tissue, 'mature.xlsx'), sheet = 1)
+  markers_subclass <- readxl::read_xlsx(file.path(getwd(), 'requirements_file/markers', tissue, 'mature.xlsx'), sheet = 2, col_names = F)
+} else if (markers == 'canonical' && cell_development_status %in% c('development','cell_culture') && file.exists(file.path(getwd(), 'requirements_file/markers', tissue, 'development.xlsx'))) {
+  markers_class <- readxl::read_xlsx(file.path(getwd(), 'requirements_file/markers', tissue, 'development.xlsx'), sheet = 1)
+  markers_subclass <- readxl::read_xlsx(file.path(getwd(), 'requirements_file/markers', tissue, 'development.xlsx'), sheet = 2, col_names = F)
+} else {
+  markers_class <- readxl::read_xlsx(file.path(getwd(), 'requirements_file/markers/non_canonical.xlsx'), sheet = 1)
+  markers_subclass <- readxl::read_xlsx(file.path(getwd(), 'requirements_file/markers/non_canonical.xlsx'), sheet = 2, col_names = F)
+} 
+  
 
 ###########################################################################################################################################################
 
