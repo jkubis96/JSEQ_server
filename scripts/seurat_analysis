@@ -6,7 +6,7 @@ echo -e '\033[1;36m $(date) Start counts / expression analysis'
 data=1
 
 PATH_PROJECT=$(pwd)/projects/$directory_name
-MARKERS=$marker_path
+MARKERS=$marker_type
 tissue=$tissue
 cell_development_status=$cell_development_status
 
