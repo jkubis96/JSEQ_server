@@ -16,16 +16,6 @@ Rscript $SCRIPTS_EXTRACT/seurat_cluster_species.R $PATH_PROJECT $MARKERS $specie
 cp $SCRIPTS_EXTRACT/manual_species.R $PATH_PROJECT/results
 mv $PATH_PROJECT/results/manual_species.R $PATH_PROJECT/results/manual_analysis.R 
 
-rm -rf $PATH_PROJECT/results/HDMAP_subtypes_files
-rm -rf $PATH_PROJECT/results/UMAP_with_DE_gene_subtypes_files
-rm -rf $PATH_PROJECT/results/.Rhistory
-rm -rf $PATH_PROJECT/results/Completed.bam
-rm -rf $PATH_PROJECT/results/*.svg
-rm -rf $PATH_PROJECT/results/HDMAP_subtypes.html
-rm -rf $PATH_PROJECT/results/*.csv
-rm -rf $PATH_PROJECT/results/UMAP_with_DE_gene_subtypes.html
-rm -rf $PATH_PROJECT/results/*.jpeg
-rm -rf $PATH_PROJECT/results/scRNAmetrics.html
-rm -rf $PATH_PROJECT/results/*.txt
+
 
 }

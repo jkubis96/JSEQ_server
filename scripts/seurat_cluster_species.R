@@ -517,8 +517,9 @@ idents_subtypes <- as.data.frame(Idents(UMI))
 idents_subtypes$idents <- rownames(idents_subtypes)
 colnames(idents_subtypes) <- c('subtypes', 'idents')
 meta_data <- merge(meta_data, idents_subtypes, by = 'idents')
-meta_data$subtypes[grep(pattern = 'BAD!', meta_data$subtypes)] <- '-'
-meta_data$subtypes[grep(pattern = 'Bad!', meta_data$subtypes)] <- '-'
+print(colnames(meta_data))
+meta_data$subtypes[grep(pattern = 'BAD!', meta_data$subtypes)] <- NULL
+meta_data$subtypes[grep(pattern = 'Bad!', meta_data$subtypes)] <- NULL
 
 h5write(meta_data, file.path(path,  "data.h5"),"metadata/cells_meta")
 
@@ -687,7 +688,7 @@ rm(pheat)
 
 print('Report creating')
 
-if (species %in% c('human','mice', 'custom')) {
+if (species %in% c('human','mouse', 'custom')) {
   rmarkdown::render(input = file.path(getwd(), 'scripts/report_species.Rmd'), 
                     output_format = 'html_document', output_dir = OUTPUT, 
                     output_file = 'Report')
