@@ -585,6 +585,9 @@ cell_development_status=$cell_development_status
 data=3
 project_name=$project_name
 
+rm -rf $PATH_PROJECT/fast_data
+
+
 SCRIPTS_EXTRACT=$(pwd)/scripts
 Rscript $SCRIPTS_EXTRACT/seurat_cluster_species.R $PATH_PROJECT $MARKERS $species $project_name $data $cell $tissue $cell_development_status
 
@@ -594,9 +597,15 @@ mv $PATH_PROJECT/results/manual_species.R $PATH_PROJECT/results/manual_analysis.
 CHECK=$(pwd)/projects/$directory_name/sc_data
 if [[ -f $CHECK/matrix.mtx ]];
 then	
-rm -rf $PATH_PROJECT/tmp
-rm -rf $PATH_PROJECT/fast_data
 
+rm -rf $PATH_PROJECT/tmp
+cp $SCRIPTS_EXTRACT/manual_species.R $PATH_PROJECT/results
+mv $PATH_PROJECT/results/Report.html $PATH_PROJECT/Report.html
+mv $PATH_PROJECT/results/Results.rde $PATH_PROJECT/Results.rds
+mv $PATH_PROJECT/results/manual_analysis.R $PATH_PROJECT/manual_analysis.R
+mv $PATH_PROJECT/results/process.log.out $PATH_PROJECT/process.log.out
+rm -rf $PATH_PROJECT/results
+rm -rf $PATH_PROJECT/tmp
 
 fi
 
