@@ -32,9 +32,13 @@ path <- args[6]
 markers <-args[7]
 species <- args[8]
 seurat_umi <- file.path(path,'sc_data/')
+OUTPUT <- file.path(path, 'results')
 path_results <- file.path(path, 'results')
 project_name <- args[9]
 data <- args[10]
+estimated_cells <- args[11]
+tissue <- args[12]
+cell_development_status <- args[13]
 functions <- file.path(getwd(), 'functions.R')
 source(functions)
 

@@ -583,9 +583,10 @@ MARKERS=$marker_type
 tissue=$tissue
 cell_development_status=$cell_development_status
 data=3
+project_name=$project_name
 
 SCRIPTS_EXTRACT=$(pwd)/scripts
-Rscript $SCRIPTS_EXTRACT/seurat_cluster_species.R $PATH_PROJECT $MARKERS $species $directory_name $data $cell $tissue $cell_development_status
+Rscript $SCRIPTS_EXTRACT/seurat_cluster_species.R $PATH_PROJECT $MARKERS $species $project_name $data $cell $tissue $cell_development_status
 
 cp $SCRIPTS_EXTRACT/manual_species.R $PATH_PROJECT/results
 mv $PATH_PROJECT/results/manual_species.R $PATH_PROJECT/results/manual_analysis.R 

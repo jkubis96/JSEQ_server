@@ -81,6 +81,9 @@ if (markers == 'canonical' && cell_development_status == 'mature' && file.exists
   
 
 ###########################################################################################################################################################
+print(markers_class)
+print(markers_subclass)
+print(file.path(getwd(), 'requirements_file/markers', tissue, 'mature.xlsx'))
 
 { 
   # Load the raw dataset by UMI
@@ -512,19 +515,18 @@ print('Checking and renaming subtypes')
 renamed_list  <- name_repairing(UMI, average_expression, markers_class, markers_subclass, species)
 Idents(UMI) <- renamed_list$Renamed_idents
 
-#CHANGE
+
 idents_subtypes <- as.data.frame(Idents(UMI))
 idents_subtypes$idents <- rownames(idents_subtypes)
 colnames(idents_subtypes) <- c('subtypes', 'idents')
 meta_data <- merge(meta_data, idents_subtypes, by = 'idents')
-print(colnames(meta_data))
-meta_data$subtypes[grep(pattern = 'BAD!', meta_data$subtypes)] <- NULL
-meta_data$subtypes[grep(pattern = 'Bad!', meta_data$subtypes)] <- NULL
+meta_data$subtypes[grep(pattern = 'BAD!', meta_data$subtypes)] <- 'Undefined'
+meta_data$subtypes[grep(pattern = 'Bad!', meta_data$subtypes)] <- 'Undefined'
 
 h5write(meta_data, file.path(path,  "data.h5"),"metadata/cells_meta")
 
 
-exp_matrix <- GetAssayData(UMI, slot = 'data')
+exp_matrix <- as.data.frame(GetAssayData(UMI, slot = 'data'))
 colnames(exp_matrix) <- meta_data$idents
 
 h5write(exp_matrix, file.path(path,  "data.h5"),"frames/normalized_wide_cell_data")
@@ -608,7 +610,7 @@ htmlwidgets::saveWidget(hd_map_plot, file.path(OUTPUT, "HDMAP_subtypes.html"))
 
 h5write(HDMAP, file.path(path,  "data.h5"),"metadata/map_cordinates")
 
-
+write.table(HDMAP, file = file.path(OUTPUT, "hdmap_cordinates.csv"), sep = ',')
 
 #Create Expression Matrix
 
@@ -644,6 +646,7 @@ average_expression <- aggregation_chr(UMI)
 
 h5write(average_expression, file.path(path,  "data.h5"),"frames/subtypes_avg_norm_expression")
 
+saveRDS(UMI, file = file.path(OUTPUT, "Results.rds"))
 
 ###########################################################################################################################################################
 
@@ -696,3 +699,5 @@ if (species %in% c('human','mouse', 'custom')) {
   quit()
   n
 }
+
+
