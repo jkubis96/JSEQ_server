@@ -529,7 +529,6 @@ meta_data$subtypes <- as.character(meta_data$subtypes)
 meta_data$cluster <- as.character(meta_data$cluster)
 
 
-h5write(meta_data, file.path(path,  "data.h5"),"metadata/cells_meta")
 
 
 
@@ -618,7 +617,12 @@ hd_map_plot <- plotly::ggplotly(DimPlotFactor(HDMAP))
 
 htmlwidgets::saveWidget(hd_map_plot, file.path(OUTPUT, "HDMAP_subtypes.html"))
 
-h5write(HDMAP, file.path(path,  "data.h5"),"metadata/map_cordinates")
+meta_data <- merge(meta_data, HDMAP[,c('HDMAP_1', 'HDMAP_2', 'BARCODES')], by.x = 'idents', by.y = 'BARCODES')
+
+
+h5write(meta_data, file.path(path,  "data.h5"),"metadata/cells_meta")
+
+
 
 write.table(HDMAP, file = file.path(OUTPUT, "hdmap_cordinates.csv"), sep = ',')
 
