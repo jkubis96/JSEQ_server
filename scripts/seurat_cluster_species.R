@@ -527,11 +527,9 @@ meta_data$subtypes[grep(pattern = 'Bad!', meta_data$subtypes)] <- 'Undefined'
 h5write(meta_data, file.path(path,  "data.h5"),"metadata/cells_meta")
 
 
-exp_matrix <- GetAssayData(UMI, slot = 'data')
-colnames(exp_matrix) <- meta_data$idents
 
-h5write(GetAssayData(UMI, slot = 'data'), file.path(path,  "data.h5"),"frames/normalized_wide_cell_data")
-h5write(GetAssayData(UMI, slot = 'counts'), file.path(path,  "data.h5"),"frames/count_wide_cell_data")
+h5write(as.matrix(GetAssayData(UMI, slot = 'data')), file.path(path,  "data.h5"),"frames/normalized_wide_cell_data")
+h5write(as.matrix(GetAssayData(UMI, slot = 'counts')), file.path(path,  "data.h5"),"frames/count_wide_cell_data")
 h5write(rownames(UMI), file.path(path,  "data.h5"),"frames/wide_cell_data_rows")
 h5write(meta_data$idents, file.path(path,  "data.h5"),"frames/wide_cell_data_barcodes")
 h5write(meta_data$subclass, file.path(path,  "data.h5"),"frames/wide_cell_data_subtypes")
