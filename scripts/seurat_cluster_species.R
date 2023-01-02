@@ -419,6 +419,7 @@ print('Naming - DONE')
 
 colnames(average_expression) <- new.cluster.ids
 h5write(average_expression, file.path(path,  "data.h5"),"frames/subclass_avg_norm_expression")
+h5write(rownames(average_expression), file.path(path,  "data.h5"),"frames/subclass_avg_norm_expression_rows")
 
 
 #PCA plot and UMAP plot with names
@@ -526,10 +527,18 @@ meta_data$subtypes[grep(pattern = 'Bad!', meta_data$subtypes)] <- 'Undefined'
 h5write(meta_data, file.path(path,  "data.h5"),"metadata/cells_meta")
 
 
-exp_matrix <- as.data.frame(GetAssayData(UMI, slot = 'data'))
+exp_matrix <- GetAssayData(UMI, slot = 'data')
 colnames(exp_matrix) <- meta_data$idents
 
-h5write(exp_matrix, file.path(path,  "data.h5"),"frames/normalized_wide_cell_data")
+h5write(GetAssayData(UMI, slot = 'data'), file.path(path,  "data.h5"),"frames/normalized_wide_cell_data")
+h5write(GetAssayData(UMI, slot = 'counts'), file.path(path,  "data.h5"),"frames/count_wide_cell_data")
+h5write(rownames(UMI), file.path(path,  "data.h5"),"frames/wide_cell_data_rows")
+h5write(meta_data$idents, file.path(path,  "data.h5"),"frames/wide_cell_data_barcodes")
+h5write(meta_data$subclass, file.path(path,  "data.h5"),"frames/wide_cell_data_subtypes")
+h5write(meta_data$subtypes, file.path(path,  "data.h5"),"frames/wide_cell_data_subtypes")
+
+
+
 
 
 print('Checking - DONE')
@@ -645,6 +654,8 @@ rm(average_expression)
 average_expression <- aggregation_chr(UMI)
 
 h5write(average_expression, file.path(path,  "data.h5"),"frames/subtypes_avg_norm_expression")
+h5write(rownames(average_expression), file.path(path,  "data.h5"),"frames/subtypes_avg_norm_expression_rows")
+
 
 saveRDS(UMI, file = file.path(OUTPUT, "Results.rds"))
 
