@@ -524,16 +524,19 @@ meta_data <- merge(meta_data, idents_subtypes, by = 'idents')
 meta_data$subtypes[grep(pattern = 'BAD!', meta_data$subtypes)] <- 'Undefined'
 meta_data$subtypes[grep(pattern = 'Bad!', meta_data$subtypes)] <- 'Undefined'
 
+meta_data$subclass <- as.character(meta_data$subclass)
+meta_data$subtypes <- as.character(meta_data$subtypes)
+meta_data$cluster <- as.character(meta_data$cluster)
+
+
 h5write(meta_data, file.path(path,  "data.h5"),"metadata/cells_meta")
 
 
 
-h5write(as.matrix(GetAssayData(UMI, slot = 'data')), file.path(path,  "data.h5"),"frames/normalized_wide_cell_data")
-h5write(as.matrix(GetAssayData(UMI, slot = 'counts')), file.path(path,  "data.h5"),"frames/count_wide_cell_data")
+h5write(Matrix::Matrix(as.matrix(GetAssayData(UMI, slot = 'data')), byrow = TRUE, nrow = nrow(as.matrix(GetAssayData(UMI, slot = 'data'))), sparse = TRUE), file.path(path,  "data.h5"),"frames/normalized_wide_cell_data")
+h5write(Matrix::Matrix(as.matrix(GetAssayData(UMI, slot = 'counts')), byrow = TRUE, nrow = nrow(as.matrix(GetAssayData(UMI, slot = 'data'))), sparse = TRUE), file.path(path,  "data.h5"),"frames/count_wide_cell_data")
 h5write(rownames(UMI), file.path(path,  "data.h5"),"frames/wide_cell_data_rows")
 h5write(meta_data$idents, file.path(path,  "data.h5"),"frames/wide_cell_data_barcodes")
-h5write(meta_data$subclass, file.path(path,  "data.h5"),"frames/wide_cell_data_subtypes")
-h5write(meta_data$subtypes, file.path(path,  "data.h5"),"frames/wide_cell_data_subtypes")
 
 
 
