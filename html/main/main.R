@@ -217,9 +217,8 @@ server <- function(input, output, session) {
   
   observeEvent(input$start, {
     
-    input$project_name <- gsub(pattern = ' ', '_', x =  input$project_name)
-    input$affiliation <- gsub(pattern = ' ', '_', x =  input$affiliation)
-    
+
+
     CHECK <- TRUE
     
     while(CHECK) {
@@ -234,12 +233,12 @@ server <- function(input, output, session) {
       
     }
     
-    directory = paste0('project_name-', as.character(input$project_name), '__',
+    directory = paste0('project_name-', as.character(gsub(pattern = ' ', '_', x =  input$project_name)), '__',
                        'id-', as.character(code) , '__',
                        'species-', as.character(input$species), '__',
                        'sex-', as.character(input$sex), '__',
                        'tissue-', as.character(input$tissue), '__',
-                       'tissue_affiliation-', as.character(input$affiliation), '__',
+                       'tissue_affiliation-', as.character(gsub(pattern = ' ', '_', x =  input$affiliation)), '__',
                        'cell_disease_status-', as.character(input$status), '__',
                        'cell_development_status-', as.character(input$development))
     
@@ -269,12 +268,12 @@ server <- function(input, output, session) {
     conf = paste0(
       'author=', as.character(input$user), '\n',
       'email=', as.character(input$email), '\n',
-      'project_name=', as.character(input$project_name), '\n',
+      'project_name=', as.character(gsub(pattern = ' ', '_', x =  input$project_name)), '\n',
       'source=', as.character(input$source), '\n',
       'species=', as.character(input$species), '\n',
       'sex=', as.character(input$sex), '\n',
       'tissue=', as.character(input$tissue), '\n',
-      'tissue_affiliation=', as.character(input$affiliation), '\n',
+      'tissue_affiliation=', as.character(gsub(pattern = ' ', '_', x =  input$affiliation)), '\n',
       'cell_disease_status=', as.character(input$status), '\n',
       'cell_development_status=', as.character(input$development) ,' \n',
       'data_format=', as.character(input$input) ,' \n',
