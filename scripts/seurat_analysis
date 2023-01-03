@@ -21,8 +21,11 @@ mv $PATH_PROJECT/results/Report.html $PATH_PROJECT/Report.html
 mv $PATH_PROJECT/results/Results.rde $PATH_PROJECT/Results.rds
 mv $PATH_PROJECT/results/manual_analysis.R $PATH_PROJECT/manual_analysis.R
 mv $PATH_PROJECT/results/process.log.out $PATH_PROJECT/process.log.out
+mv $PATH_PROJECT/results/*.html $PATH_PROJECT/*.html
+
 rm -rf $PATH_PROJECT/results
 rm -rf $PATH_PROJECT/tmp
+
 
 
 }
