@@ -7,6 +7,8 @@ options(shiny.maxRequestSize = 300000*1024^2)
 
 t <- getwd()
 
+
+
 ui <- dashboardPage(
   skin = "blue",
   dashboardHeader(title = "JSEQ_scRNAseq"),
@@ -167,46 +169,28 @@ ui <- dashboardPage(
               
       ),
       tabItem(tabName = "exp",
-              h2("Widgets tab content"),
+            
               
-              
-              column(2, 
-                     h4("Project", align = "left"),
-                     textInput("id_code", "Project ID", 
-                               value = "", placeholder = '10-character code'),
+              column(12,style = "background-color:#FFFFFF",
+            
+                                           uiOutput('species'),
+                                           uiOutput('sex'),
+                                           uiOutput('tissue'),
+                                           uiOutput('affiliation'),
+                                           uiOutput('disease'),
+                                           uiOutput('status'),
                      
-                     actionButton("search", 'Check', icon = icon('print')),
-                     selectInput("val_choose", 
-                                 h3("Data validation:"), 
-                                 choices = list("Yes" = 1, 
-                                                "No" = 2
-                                 ), selected = 1),
-                     
-                     
-                     
-                     actionButton("val", "Validate", icon = icon('edit')),
-                     
-                     
-                     HTML(paste('','',
-                                'Data validation.',
-                                'If the output of the analysis is appropriate you can share data for other users. If you choose "Yes" the data will be available in "Data exploration" tab where you can obtain more data [analysis output files in hdf5 formats]. The data can be always removed after contact with us. If you choose "No" data will be removed. If you will not make choice the data will remove in a few days.', sep="<br/>"))
-                     
-                     
-                     
-                     
-                     
-              ),
-              
-              column(10,style = "background-color:#FFFFFF",
-                     h4("Results", align = "left"),
-                     DT::DTOutput("my_datatable")
+                                      DT::DTOutput("my_datatable"),
+                      
                      
                      
               )
               
+              
       ),
+      
       tabItem(tabName = "contact",
-              h2("Widgets tab content")
+            
               
       )
     )
@@ -443,38 +427,185 @@ server <- function(input, output, session) {
     
   })
   
-  
-
-  
-   values <- reactiveValues()
     
     
     
     
     list <- list()
     
+    buttons = ''
+    
     n = 0
     
     for (file in list.files('../../projects/')) {
       n = n + 1
-      list$project_name[n] <- sub('__.*', '', gsub('.*project_name-', '', file))
-      list$project_id[n] <- sub('__.*', '', gsub('.*id-', '', file))
+      list$id[n] <- sub('__.*', '', gsub('.*id-', '', file))
       list$species[n] <- sub('__.*', '', gsub('.*species-', '', file))
-      list$tissue[n] <- sub('__.*', '', gsub('.*tissue-', '', file))
-      list$tissue_affiliation[n] <- sub('__.*', '', gsub('.*tissue_affiliation-', '', file))
-      list$disease_status[n] <- sub('__.*', '', gsub('.*disease_status-', '', file))
       list$sex[n] <- sub('__.*', '', gsub('.*sex-', '', file))
-      list$cell_development_status[n] <- sub('__.*', '', gsub('.*cell_development_status-', '', file))
+      list$tissue[n] <- sub('__.*', '', gsub('.*tissue-', '', file))
+      list$affiliation[n] <- sub('__.*', '', gsub('.*tissue_affiliation-', '', file))
+      list$disease[n] <- sub('__.*', '', gsub('.*disease_status-', '', file))
+      list$sex[n] <- sub('__.*', '', gsub('.*sex-', '', file))
+      list$status[n] <- sub('__.*', '', gsub('.*cell_development_status-', '', file))
+      tmp <-  read.csv(file.path('../../projects/',file, 'config'), sep = '=', header = FALSE)
+      list$cells[n] <- gsub('/', '', tmp$V2[tmp$V1 == 'cells_after_qc'])
+      list$subclasses[n] <- gsub('/', '', tmp$V2[tmp$V1 == 'subclasses_number'])
+      list$subtypes[n] <- gsub('/', '', tmp$V2[tmp$V1 == 'subtypes_number'])
+      list$action[n] <- as.character(actionButton(as.character(sub('__.*', '', gsub('.*id-', '', file))),'Show'))
+
+      buttons <- paste0(buttons, 'observeEvent(input$',as.character(sub('__.*', '', gsub('.*id-', '', file))),', {})\n')
+      
+      
       
       
       
       
     }
     
-    values$df <- as.data.frame(list)
-    output$my_datatable <- DT::renderDataTable(as.data.frame(list),
-                        selection = 'single')
 
+    eval(parse(text = buttons))
+    
+  
+    values <- reactiveValues()
+    df <- as.data.frame(list)
+    
+    
+
+    species <- c()
+    sex <- c()
+    affiliation <- c()
+    tissue <- c()
+    disease <- c()
+    status <- c()
+    
+    for (file in list.files('../../projects/')) {
+
+      
+      species <- c(species, sub('__.*', '', gsub('.*species-', '', file)))
+      sex <- c(sex, sub('__.*', '', gsub('.*sex-', '', file)))
+      tissue <- c(tissue, sub('__.*', '', gsub('.*tissue-', '', file)))
+      affiliation <- c(affiliation, sub('__.*', '', gsub('.*tissue_affiliation-', '', file)))
+      disease <- c(disease, sub('__.*', '', gsub('.*disease_status-', '', file)))
+      status <- c(status, sub('__.*', '', gsub('.*cell_development_status-', '', file)))
+      
+    }
+    
+    species <- c('all', species)
+    sex <- c('all', sex)
+    tissue <- c('all', tissue)
+    affiliation <- c('all', affiliation)
+    disease <- c('all', disease)
+    status <- c('all',status)
+    
+    species <- unique(species)
+    sex <- unique(sex)
+    tissue <- unique(tissue)
+    affiliation <- unique(affiliation)
+    disease <- unique(disease)
+    status <- unique(status)
+    
+    names(species) <- species
+    names(sex) <- sex
+    names(tissue) <- tissue
+    names(affiliation) <- affiliation
+    names(disease) <- disease
+    names(status) <- status
+    
+    output$species <- renderUI({ 
+     
+      
+    column(2, selectInput("species_filter", 
+                          h4("Species"), 
+                          choices = species, selected = 'all')) })
+    
+    output$sex <- renderUI({
+    column(2, selectInput("sex_filter", 
+                          h4("Sex"), 
+                          choices = sex, selected = 'all')) })
+    
+    output$tissue <- renderUI({
+    column(2, selectInput("tissue_filter", 
+                          h4("Tissue"), 
+                          choices = tissue, selected = 'all')) })
+    
+    output$affiliation <- renderUI({
+    column(2, selectInput("affiliation_filter", 
+                          h4("Affiliation"), 
+                          choices = affiliation, selected = 'all')) })
+    
+    output$disease <- renderUI({
+    column(2, selectInput("disease_filter", 
+                          h4("Disease"), 
+                          choices = disease, selected = 'all')) })
+    
+    output$status <- renderUI({
+    column(2, selectInput("status_filter", 
+                          h4("Status"), 
+                          choices = status, selected = 'all')) })
+
+    
+    observeEvent(input$species_filter, {
+    
+    if (input$species_filter != 'all') {
+      values$df <- df
+      values$df <- values$df[values$df$species %in% input$species_filter,]
+    } else {
+      values$df <- df
+      }
+    })
+    
+    
+    observeEvent(input$sex_filter, {
+    if (input$sex_filter != 'all') {
+      values$df <- df
+      values$df <- values$df[values$df$sex %in% input$sex_filter,]
+    } else {
+      values$df <- df
+      }
+    })
+    
+    observeEvent(input$tissue_filter, {
+    if (input$tissue_filter != 'all') {
+      values$df <- df
+      values$df <- values$df[values$df$tissue %in% input$tissue_filter,]
+    } else {
+      values$df <- df
+      }
+    })
+    
+    observeEvent(input$affiliation_filter, {
+    if (input$affiliation_filter != 'all') {
+      values$df <- df
+      values$df <- values$df[values$df$affiliation %in% input$affiliation_filter,]
+    } else {
+      values$df <- df
+      }
+    })
+    
+    observeEvent(input$disease_filter, {
+    if (input$disease_filter != 'all') {
+      values$df <- df
+      values$df <- values$df[values$df$disease %in% input$disease_filter,]
+    } else { 
+      values$df <- df}
+    })
+    
+    observeEvent(input$status_filter, {
+    if (input$status_filter != 'all') {
+      values$df <- df
+      values$df <- values$df[values$df$status %in% input$status_filter,]
+    } else {
+      values$df <- df
+      }
+    })
+    
+    
+
+    output$my_datatable <- DT::renderDataTable(values$df,
+                                               server = TRUE, escape = FALSE, selection = 'none')
+
+    
+    
     # output$my_datatable = DT::renderDataTable(
     #   values$df, escape = FALSE, selection = 'none', server = FALSE, 
     #   options = list(dom = 't', paging = FALSE, ordering = FALSE),
