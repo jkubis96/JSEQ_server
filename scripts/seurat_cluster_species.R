@@ -208,7 +208,7 @@ UMI <- subset(UMI, subset = nGenes > down_tr & nGenes <= n_gen & MitoPercent < m
 n_gen <- max(as.numeric(UMI@meta.data$nGenes))*0.95
 cells_number <- length(Idents(UMI))
 
-system_info <- paste0(file.path('echo cells_after_qc=', cells_number ,' >> ', path,'config'))
+system_info <- paste0(file.path('echo cells_after_qc=', as.integer(cells_number) ,' >> ', path,'config'))
 system(system_info)
 
 ###########################################################################################################################################################
@@ -425,7 +425,7 @@ h5write(rownames(average_expression), file.path(path,  "data.h5"),"frames/subcla
 
 subclasses_number <- length(colnames(average_expression))
 
-system_info <- paste0(file.path('echo subclasses_number=', subclasses_number ,' >> ', path,'config'))
+system_info <- paste0(file.path('echo subclasses_number=', as.integer(subclasses_number) ,' >> ', path,'config'))
 system(system_info)
 
 #PCA plot and UMAP plot with names
@@ -666,7 +666,7 @@ average_expression <- aggregation_chr(UMI)
 
 subtypes_number <- length(colnames(average_expression))
 
-system_info <- paste0(file.path('echo subtypes_number=', subtypes_number ,' >> ', path,'config'))
+system_info <- paste0(file.path('echo subtypes_number=', as.integer(subtypes_number) ,' >> ', path,'config'))
 system(system_info)
 
 h5write(average_expression, file.path(path,  "data.h5"),"frames/subtypes_avg_norm_expression")
