@@ -619,6 +619,11 @@ htmlwidgets::saveWidget(plotly::ggplotly(DimPlot(UMI, reduction = "umap", raster
 
 HDMAP <- hdmap_cordinates(UMI, hd_factors)
 
+
+svg(file.path(OUTPUT, "HDMAP_subtypes.svg"), width = width, height = 15)
+DimPlotFactor(HDMAP)
+dev.off()
+
 hd_map_plot <- plotly::ggplotly(DimPlotFactor(HDMAP))
 
 htmlwidgets::saveWidget(hd_map_plot, file.path(OUTPUT, "HDMAP_subtypes.html"))
