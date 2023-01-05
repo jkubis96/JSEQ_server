@@ -1,9 +1,14 @@
 library(shiny)
 library(shinydashboard)
 library(shinyvalidate)
+library(DT)
+library(rhdf5)
+library(plotly)
 
 
 options(shiny.maxRequestSize = 300000*1024^2)
+
+
 
 t <- getwd()
 
@@ -169,22 +174,105 @@ ui <- dashboardPage(
               
       ),
       tabItem(tabName = "exp",
-            
+              tabsetPanel(type = "tabs",
+                          tabPanel("Data", column(12,style = "background-color:#FFFFFF",
+                                                  
+                                                  uiOutput('species'),
+                                                  uiOutput('sex'),
+                                                  uiOutput('tissue'),
+                                                  uiOutput('affiliation'),
+                                                  uiOutput('disease'),
+                                                  uiOutput('status'),
+                                                  DT::DTOutput("my_datatable"),
+                                                  
+                                                 
+                                                  
+                                                  
+                                                  
+                          )
+                          
+                          
+                          
+                          ),
+                          tabPanel("Info", 
+                                   column(12,style = "background-color:#FFFFFF",
+                                          
+                                  
+                                    
+                                          uiOutput("explor1"))
+                                   
+                                   
+                                   ),
+                         
+                          tabPanel("Visualization",
+                                  
+                                   column(8,style = "background-color:#FFFFFF",
+
+                                          plotlyOutput('explor4', width =  '1200px', height = '650px')
+
+                                        ), column(2,offset = 2,
+                                                  
+                                          uiOutput('explor3')
+                                                  
+                                        ),
+                                   
+
+
+                                   
+                          ),
+                          tabPanel("Markers", 
+                                   
+                              
+                                    column(10,style = "background-color:#FFFFFF",
+                                           
+                                           DTOutput('explor6', width =  '1100px')
+                                           
+                                    ), column(2,offset = 0,
+                                              
+                                              uiOutput('explor5')
+                                              
+                                    ),
+                                   
+                                   
+                          ),
+                          tabPanel("Gene_viewer", 
+                                   column(10,style = "background-color:#FFFFFF",
+                                          
+                                          plotlyOutput('explor9', width =  '1100px', height = '650px')
+                                          
+                                   ), column(2,offset = 0,
+                                             
+                                             uiOutput('explor7'),
+                                             uiOutput('explor8'),
+                                             uiOutput('explor7.1')
+                                             
+                                   ),
+                                   
+                                   
+                          ),
+                          tabPanel("Interactions", 
+                                   column(2,style = "background-color:#FFFFFF",
+                                          
+                                          
+                                          
+                                         )
+                                   
+                                   
+                          ), tabPanel("Report", 
+                                      column(12,style = "background-color:#FFFFFF",
+                                             
+                                             # htmlOutput("explor2"),
+                                             
+                                             
+                                      )
+                                      
+                                      
+                          ),
+                                   
+                               
+                         
+              ),
               
-              column(12,style = "background-color:#FFFFFF",
-            
-                                           uiOutput('species'),
-                                           uiOutput('sex'),
-                                           uiOutput('tissue'),
-                                           uiOutput('affiliation'),
-                                           uiOutput('disease'),
-                                           uiOutput('status'),
-                     
-                                      DT::DTOutput("my_datatable"),
-                      
-                     
-                     
-              )
               
               
       ),
@@ -394,20 +482,37 @@ server <- function(input, output, session) {
       if(input$val_choose == 1) {
         
         
-        mv = paste0('cd ../../; mv ' ,paste0('$(pwd)/projects/', list.files(file.path('../../projects'))[grepl(pattern = input$id_code, x = list.files(file.path('../../projects')))]),' ', paste0('$(pwd)/validated/', list.files(file.path('../../projects'))[grepl(pattern = input$id_code, x = list.files(file.path('../../projects')))]))
+        destDir <- file.path('../../validated')
         
-        system(mv)
+        inFile <- file.path('../../projects', list.files(file.path('../../projects'))[grepl(pattern = input$id_code, x = list.files(file.path('../../projects')))])
         
+
+        file.copy(inFile, destDir, recursive=TRUE)
+        
+        unlink(inFile, recursive=TRUE)
+        
+        output$project_validation <- renderUI({ 
+          HTML(paste('','',
+                     'Project accepted for publication.', sep="<br/>"))
+        })
+
+        
+        
+       
         
         
         
       } else {
         
-        rm = paste0('cd ../../; rm -rf ' ,paste0('$(pwd)/projects/', list.files(file.path('../../projects'))[grepl(pattern = input$id_code, x = list.files(file.path('../../projects')))]))
+        inFile <- file.path('../../projects', list.files(file.path('../../projects'))[grepl(pattern = input$id_code, x = list.files(file.path('../../projects')))])
         
-        system(rm)        
+        unlink(inFile, recursive=TRUE)  
+        
+        output$project_validation <- renderUI({ 
+          HTML(paste('','',
+                     'Project removed succedfully', sep="<br/>"))
+        })
       }
-      
       
     } else if (nchar(input$id_code) == 10 && FALSE  == unique(grepl(pattern = input$id_code, x = list.files(file.path('../../projects'))))) {
       
@@ -429,15 +534,13 @@ server <- function(input, output, session) {
   
     
     
-    
-    
+
     list <- list()
     
-    buttons = ''
     
     n = 0
     
-    for (file in list.files('../../projects/')) {
+    for (file in list.files('../../validated/')) {
       n = n + 1
       list$id[n] <- sub('__.*', '', gsub('.*id-', '', file))
       list$species[n] <- sub('__.*', '', gsub('.*species-', '', file))
@@ -447,28 +550,39 @@ server <- function(input, output, session) {
       list$disease[n] <- sub('__.*', '', gsub('.*disease_status-', '', file))
       list$sex[n] <- sub('__.*', '', gsub('.*sex-', '', file))
       list$status[n] <- sub('__.*', '', gsub('.*cell_development_status-', '', file))
-      tmp <-  read.csv(file.path('../../projects/',file, 'config'), sep = '=', header = FALSE)
+      tmp <-  read.csv(file.path('../../validated',file, 'config'), sep = '=', header = FALSE)
       list$cells[n] <- gsub('/', '', tmp$V2[tmp$V1 == 'cells_after_qc'])
       list$subclasses[n] <- gsub('/', '', tmp$V2[tmp$V1 == 'subclasses_number'])
       list$subtypes[n] <- gsub('/', '', tmp$V2[tmp$V1 == 'subtypes_number'])
-      list$action[n] <- as.character(actionButton(as.character(sub('__.*', '', gsub('.*id-', '', file))),'Show'))
+      list$action[n] <- sub('__.*', '', gsub('.*id-', '', file))
 
-      buttons <- paste0(buttons, 'observeEvent(input$',as.character(sub('__.*', '', gsub('.*id-', '', file))),', {})\n')
-      
-      
       
       
       
       
     }
     
-
-    eval(parse(text = buttons))
     
-  
+    
+ 
     values <- reactiveValues()
     df <- as.data.frame(list)
     
+    button <- function(tbl){
+      function(i){
+        sprintf(
+          '<button id="button_%s_%s" type="button" onclick="%s">Explore</button>', 
+          tbl, i, "Shiny.setInputValue('button', this.id);")
+        
+      }
+    }
+    
+   
+    df <- cbind(df, 
+                  button = sapply(df$action, button("df")), 
+                  stringsAsFactors = FALSE)
+    
+    df <- df[colnames(df)]
     
 
     species <- c()
@@ -478,7 +592,7 @@ server <- function(input, output, session) {
     disease <- c()
     status <- c()
     
-    for (file in list.files('../../projects/')) {
+    for (file in list.files('../../validated/')) {
 
       
       species <- c(species, sub('__.*', '', gsub('.*species-', '', file)))
@@ -549,8 +663,13 @@ server <- function(input, output, session) {
     if (input$species_filter != 'all') {
       values$df <- df
       values$df <- values$df[values$df$species %in% input$species_filter,]
+  
+      
     } else {
       values$df <- df
+      
+     
+      
       }
     })
     
@@ -600,27 +719,236 @@ server <- function(input, output, session) {
     })
     
     
+    
+   
+       output$my_datatable <- DT::renderDataTable(values$df,
+                                               server = FALSE, escape = FALSE, selection = 'none')
 
-    output$my_datatable <- DT::renderDataTable(values$df,
-                                               server = TRUE, escape = FALSE, selection = 'none')
 
-    
-    
-    # output$my_datatable = DT::renderDataTable(
-    #   values$df, escape = FALSE, selection = 'none', server = FALSE, 
-    #   options = list(dom = 't', paging = FALSE, ordering = FALSE),
-    #   editable = TRUE,
-    #   callback = JS("table.rows().every(function(i, tab, row) {
-    #     var $this = $(this.node());
-    #     $this.attr('id', this.data()[0]);
-    #     $this.addClass('shiny-input-container');
-    #   });
-    #   Shiny.unbindAll(table.table().node());
-    #   Shiny.bindAll(table.table().node());")
-    # )
-    
-    
+
+       
+       observeEvent(input[["button"]], {
+         splitID <- strsplit(input[["button"]], "_")[[1]]
+         tbl <- splitID[2]
+         row <- splitID[3]
+        
+       
+         txt <- read.csv(file.path('../../validated',list.files('../../validated/')[grep(row, list.files('../../validated/'))], 'config'), sep = '=', header = FALSE)
+         txt <- txt[txt$V1 %in% c('author', 'project_name','email', 'source', 'sex', 'species', 'tissue', 'tissue_affiliation', 'cell_disease_status', 'cell_development_status', 'library', 'READS_LENGTH', 'cells_after_qc', 'subclasses_number', 'subtypes_number'),]
+         text = ''
+         for (d in 1:nrow(txt)) {
+           text <- paste0(text, as.character(txt$V1[d]), ':', as.character(txt$V2[d]), '<br/>')
+         }
+         
+         # output$info_out 
+         
+         output$explor1 <- renderText({HTML(text, sep="<br/>") })
+         output$explor2 <- renderUI({includeHTML(file.path('../../validated/', list.files('../../validated/')[grep(row, list.files('../../validated/'))], 'Report.html'))})
+
+         
+         path = file.path('../../validated/', list.files('../../validated/')[grep(row, list.files('../../validated/'))], 'data.h5')
+         cells_meta <- h5read(path, "metadata/cells_meta")
+         
+         output$explor3 <- renderUI({
+           selectInput('plot_var', 'Choose data presentation:', choices = list('UMAP_subclasses' = 1, 'UMAP_subtypes' = 2, 'HDMAP_subtypes' = 3), selected = 1, multiple = FALSE, selectize = TRUE)
+           
+         })
+         
+         
+         observeEvent(input$plot_var, {
+           if (input$plot_var == 1) {
+             
+             
+             plot <- ggplot(data = cells_meta, mapping = aes(UMAP_1, UMAP_2, color = subclass)) + geom_point()  + theme_classic() 
+             
+             output$explor4 <- renderPlotly({
+               ggplotly(plot, originalData = FALSE, dynamicTicks = FALSE)
+               
+             })
+             
+             
+             
+           } else if (input$plot_var == 2) {
+             
+             
+             plot <- ggplot(data = cells_meta, mapping = aes(UMAP_1, UMAP_2, color = subtypes)) + geom_point()  + theme_classic() 
+             
+             output$explor4 <- renderPlotly({
+               ggplotly(plot, originalData = FALSE, dynamicTicks = FALSE)
+               
+             })
+             
+             
+             
+           } else if (input$plot_var == 3) {
+             
+             
+             plot <- ggplot(data = cells_meta, mapping = aes(HDMAP_1, HDMAP_2, color = subtypes)) + geom_point()  + theme_classic() 
+             
+             output$explor4 <- renderPlotly({
+               ggplotly(plot, originalData = FALSE, dynamicTicks = FALSE)
+               
+             })
+             
+             
+             
+           }
+           
+         
+        
+                  
+         })
+         
+         
+         
+         output$explor5 <- renderUI({
+           selectInput('markers_var', 'Choose markers:', choices = list('Subclasses' = 1, 'Subtypes' = 2, 'CSSG_markers' = 3), selected = 1, multiple = FALSE, selectize = TRUE)
+
+         })
+
+
+         observeEvent(input$markers_var, {
+           if (input$markers_var == 1) {
+
+
+
+             output$explor6 <- DT::renderDataTable({
+                    datatable(h5read(path, "markers/subclass_markers"), options = list(pageLength = 15),
+                              rownames= FALSE)
+
+             })
+
+
+
+           } else if (input$markers_var == 2) {
+
+
+             output$explor6 <- DT::renderDataTable({
+               datatable(h5read(path, "markers/subtypes_markers"), options = list(pageLength = 15),
+                         rownames= FALSE)
+
+             })
+
+
+
+           } else if (input$markers_var == 3) {
+
+
+            output$explor6 <- DT::renderDataTable({
+               datatable(h5read(path, "markers/CSSG"), options = list(pageLength = 15),
+                         rownames= FALSE)
+
+             })
+
+
+
+           }
+
+
+
+
+         })
+         
+         
+         output$explor7 <- renderUI({
+           selectInput('genes_var', 'Choose data:', choices = list('Subclasses' = 1, 'Subtypes' = 2), selected = 2, multiple = FALSE, selectize = TRUE)
+           
+         })
+         
+         
+         output$explor7.1 <- renderUI({
+           actionButton("update_plot", 'Upadte', icon = icon('print'))
+           
+         })
+           
+         output$explor8 <- renderUI({
+           textInput('genes_input', 'Enter genes:', value = "", width = NULL, placeholder = 'KIT, ednrb, Pax3, ...')
+
+
+         })
+         
+         
+         observeEvent(input$genes_var, {
+           if (input$genes_var == 1) {
+             
+             tmp <- h5read(path, "frames/subclass_avg_norm_expression")
+             genes <- h5read(path, "frames/subclass_avg_norm_expression_rows")
+             
+             genes_cssg <- gsub(pattern = '*.- ', '', colnames(tmp))
+             rownames(tmp) <- genes
+             
+             pheat <- pheatmap::pheatmap(tmp, 
+                                         clustering_method = 'ward.D',
+                                         angle_col = 270, fontsize_row = 20, fontsize_col = 20)
+             
+             
+             
+             
+             
+      
+             
+             
+             
+           } else if (input$genes_var == 2) {
+             
+             
+             tmp <- h5read(path, "frames/subtypes_avg_norm_expression")
+             genes <- h5read(path, "frames/subtypes_avg_norm_expression_rows")
+             
+             genes_select <- gsub(pattern = '.*- ', '', colnames(tmp))
+             
+             rownames(tmp) <- genes
+             
+
+               
+            
+            
+             
+             plot <- t(as.matrix(tmp[toupper(rownames(tmp)) %in% toupper(genes_select),]))
+             
+             output$explor9 <- renderPlotly({plot_ly(
+               x = colnames(plot), y = rownames(plot),
+               z = plot, type = "heatmap",
+             ) 
+               
+             })
+             
+             
+             observeEvent(input$update_plot, {
+               genes_select <- c(genes_select, c(strsplit(input$genes_input,split=", ",fixed=TRUE)[[1]]))
+               
+               plot <- t(as.matrix(tmp[toupper(rownames(tmp)) %in% toupper(genes_select),]))
+               
+               output$explor9 <- renderPlotly({plot_ly(
+                 x = colnames(plot), y = rownames(plot),
+                 z = plot, type = "heatmap",
+               )
+               })
+               
+             })
+             
+             
+             
+             
+           } 
+           
+           
+           
+           
+         })
+         
+          
+        
   
+         
+         showModal(modalDialog(
+           title = paste0("Dataset ", row, ' was chosen. Got to Explore tab'),
+           size = 's',
+           easyClose = TRUE,
+           footer = NULL
+         ))
+       })
+
   
   
 }
