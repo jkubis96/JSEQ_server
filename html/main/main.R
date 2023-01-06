@@ -208,7 +208,7 @@ ui <- dashboardPage(
                                   
                                    column(8,style = "background-color:#FFFFFF",
 
-                                          plotlyOutput('explor4', width =  '1200px', height = '650px')
+                                          plotlyOutput('explor4', width =  '1100px', height = '650px')
 
                                         ), column(2,offset = 2,
                                                   

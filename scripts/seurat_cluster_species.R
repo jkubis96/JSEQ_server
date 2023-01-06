@@ -133,13 +133,30 @@ dev.off()
 ###########################################################################################################################################################
 
 #Droplet content and QC
-n_gen <- UMI@meta.data$nGenes[UMI@meta.data$nGenes > down_tr]
+
+mean1 <- mean(sort(UMI@meta.data$nGenes))
+
+set1 <- UMI@meta.data$nGenes[UMI@meta.data$nGenes <= mean1]
+set2 <- UMI@meta.data$nGenes[UMI@meta.data$nGenes > mean1]
+
+set1.1 <- set1[set1 <= mean(set1)]
+set2.1 <- set2[set2 > mean(set2)]
+
+
 
 if (is.na(up_tr)) {
-  n_gen <- as.numeric(mean(n_gen))*2 + 1.5*IQR(as.numeric(UMI@meta.data$nGenes))
+  n_gen <- mean(set2.1) + sd(set2.1)
 } else {
   n_gen <- up_tr
 }
+
+
+if (is.na(down_tr)) {
+  down_tr <- mean(set1.1) -  sd(set1.1)
+} else {
+  down_tr <- down_tr
+}
+
 
 QC_UMI <- data.frame()
 QC_UMI <- as.data.frame(UMI$nGenes)
@@ -165,7 +182,7 @@ DQC <- ggplot()+
   ylab("Number of genes for each cells") +
   xlab("Number of genes for each cells")+
   theme(axis.text.x = element_text(angle = 50, vjust = 1, hjust=1))+
-  labs(color='Droplet content')
+  labs(color='Droplet content') + geom_vline(xintercept = down_tr, color = 'red') + geom_vline(xintercept = n_gen, color = 'red')
  
 
 svg(filename = file.path(OUTPUT,'DropletQC.svg'), width = 10, height = 7)
@@ -205,7 +222,7 @@ rm(QC_UMI)
 #Selecting right cells
 
 UMI <- subset(UMI, subset = nGenes > down_tr & nGenes <= n_gen & MitoPercent < mt_per)
-n_gen <- max(as.numeric(UMI@meta.data$nGenes))*0.95
+n_gen <- max(as.numeric(UMI@meta.data$nGenes))
 cells_number <- length(Idents(UMI))
 
 system_info <- paste0(file.path('echo cells_after_qc=', as.character(as.numeric(cells_number)) ,' >> ', path,'config'))
@@ -368,9 +385,10 @@ colnames(tmp) <- UMI@active.ident
 marker_df <- heterogenity_select(cells_wide_df = tmp, marker_df = top_sig, heterogenity_factor = s_factor, p_val =  m_val, max_genes =  max_genes, select_stat = 'p_val')
 
 CSSG_df <- CSSG_markers(cells_wide_df = tmp, markers_df = marker_df$marker_df, max_combine = max_combine, loss_pval = loss_pval)
+
+
 hd_factors <- hd_cluster_factors(UMI, CSSG_df)
 
-h5write(CSSG_df, file.path(path,  "data.h5"),"markers/CSSG")
 
 
 ###########################################################################################################################################################
@@ -468,7 +486,15 @@ marker_cell_names <- meta_data[c('cluster', 'subclass')] %>%
   distinct()
 
 
+CSSG_df <- merge(CSSG_df, marker_cell_names, by = 'cluster')
+CSSG_df$gene_combination <- as.character(rownames(CSSG_df))
+CSSG_df <- CSSG_df[, c('cluster', 'subclass', 'loss_pval', 'hf', 'adj_hf', 'gene_combination')]
+
+h5write(CSSG_df, file.path(path,  "data.h5"),"markers/CSSG")
+
 subclasses_marker <- merge(subclasses_marker, marker_cell_names, by = 'cluster')
+subclasses_marker$subclass <- as.character(subclasses_marker$subclass)
+subclasses_marker <- subclasses_marker[, c('cluster', 'subclass', 'p_val', 'p_val_adj', 'avg_logFC', 'gene')]
 
 h5write(subclasses_marker, file.path(path,  "data.h5"),"markers/subclass_markers")
 
@@ -596,6 +622,10 @@ if (length(unique(Idents(UMI))) != length(unique(UMI.subtypes$cluster))) {
 }
 
 subtypes_marker <- UMI.subtypes %>% group_by(cluster) %>% top_n(n = 1000, wt = avg_logFC)
+subtypes_marker$subtypes <- as.character(subtypes_marker$cluster)
+
+subtypes_marker <- subtypes_marker[, c('cluster', 'subtypes', 'p_val', 'p_val_adj', 'avg_logFC', 'gene')]
+
 h5write(subtypes_marker, file.path(path,  "data.h5"),"markers/subtypes_markers")
 
 subtypes_marker_report <- UMI.subtypes %>% group_by(cluster) %>% top_n(n = 10, wt = avg_logFC)
