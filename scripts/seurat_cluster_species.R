@@ -485,12 +485,11 @@ colnames(meta_data)[5] <- 'cluster'
 marker_cell_names <- meta_data[c('cluster', 'subclass')] %>% 
   distinct()
 
-
-CSSG_df <- merge(CSSG_df, marker_cell_names, by = 'cluster')
 CSSG_df$gene_combination <- rownames(CSSG_df)
-CSSG_df$gene_combination <- as.character(CSSG_df$gene_combination)
+CSSG_df <- merge(CSSG_df, marker_cell_names, by = 'cluster')
 CSSG_df$subclass  <- as.character(CSSG_df$subclass)
 CSSG_df$cluster  <- as.character(CSSG_df$cluster)
+CSSG_df$gene_combination <- as.character(CSSG_df$gene_combination)
 
 
 CSSG_df <- CSSG_df[, c('cluster', 'subclass', 'loss_pval', 'hf', 'adj_hf', 'gene_combination')]
@@ -631,7 +630,7 @@ if (length(unique(Idents(UMI))) != length(unique(UMI.subtypes$cluster))) {
 subtypes_marker <- UMI.subtypes %>% group_by(cluster) %>% top_n(n = 1000, wt = avg_logFC)
 subtypes_marker$subtypes <- as.character(subtypes_marker$cluster)
 
-subtypes_marker <- subtypes_marker[, c('cluster', 'subtypes', 'p_val', 'p_val_adj', 'avg_logFC', 'gene')]
+subtypes_marker <- subtypes_marker[, c('subtypes', 'p_val', 'p_val_adj', 'avg_logFC', 'gene')]
 
 h5write(subtypes_marker, file.path(path,  "data.h5"),"markers/subtypes_markers")
 
