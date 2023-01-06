@@ -487,13 +487,20 @@ marker_cell_names <- meta_data[c('cluster', 'subclass')] %>%
 
 
 CSSG_df <- merge(CSSG_df, marker_cell_names, by = 'cluster')
-CSSG_df$gene_combination <- as.character(rownames(CSSG_df))
+CSSG_df$gene_combination <- rownames(CSSG_df)
+CSSG_df$gene_combination <- as.character(CSSG_df$gene_combination)
+CSSG_df$subclass  <- as.character(CSSG_df$subclass)
+CSSG_df$cluster  <- as.character(CSSG_df$cluster)
+
+
 CSSG_df <- CSSG_df[, c('cluster', 'subclass', 'loss_pval', 'hf', 'adj_hf', 'gene_combination')]
 
 h5write(CSSG_df, file.path(path,  "data.h5"),"markers/CSSG")
 
 subclasses_marker <- merge(subclasses_marker, marker_cell_names, by = 'cluster')
 subclasses_marker$subclass <- as.character(subclasses_marker$subclass)
+subclasses_marker$cluster <- as.character(subclasses_marker$cluster)
+
 subclasses_marker <- subclasses_marker[, c('cluster', 'subclass', 'p_val', 'p_val_adj', 'avg_logFC', 'gene')]
 
 h5write(subclasses_marker, file.path(path,  "data.h5"),"markers/subclass_markers")
