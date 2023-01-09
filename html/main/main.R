@@ -34,22 +34,20 @@ ui <- dashboardPage(
       # First tab content
       tabItem(tabName = "home",
               img(src = "logo_jbs.PNG", height = 100, width = 100, align = "right"),
-              #img(src = "ichb.jpg", height = 100, width = 400, align = "right"),
               h1('JSEQ_scRNAseq - tool'),
               br(),
               h4("Welcome to the JSEQ Single-Cell RNA Seq tool", align = "left"),
-              h4("This approach and software was tested on AAV vectors.", align = "left"),
+              h4("", align = "left"),
               br(),
               br(),
-              h3('Autors: Jakub Kubis, Maciej Figiel', align = "center"),
+              h3('', align = "center"),
               h3('Institute of Bioorganic Chemistry', br(),'Polish Academy of Sciences', br() , 'Department of Molecular Neurobiology', br(), align = "center"),
               
               
       ),
       
       tabItem(tabName = "analysis",
-              h1("Single cell analysis by JSEQ", align = "left"),
-              fluidRow(
+             fluidRow(
                 
                 column(3,
                        h4("Account & Project", align = "left"),
@@ -88,11 +86,15 @@ ui <- dashboardPage(
                        textInput("affiliation", "Tissue affiliation", 
                                  value = "", placeholder = 'cortex, beta-cells, etc.'),
                        
+                       selectInput("development", "Development status", 
+                                   choices = list('mature' = 'mature', 'development' = 'development', 'cell culture' = 'cell_culture')),
+                       
                        selectInput("status", "Cells status", 
                                    choices = list('healthy' = 'healthy', 'disease' = 'disease', 'unknow' = 'unknow')),
                        
-                       selectInput("development", "Development status", 
-                                   choices = list('mature' = 'mature', 'development' = 'development', 'cell culture' = 'cell_culture')),
+                       uiOutput('disease_name')
+                       
+                      
                        
                 ),
                 column(3,
@@ -195,22 +197,37 @@ ui <- dashboardPage(
                           
                           ),
                           tabPanel("Info", 
-                                   column(12,style = "background-color:#FFFFFF",
+                                   column(4,style = "background-color:#FFFFFF",
                                           
                                   
-                                    
-                                          uiOutput("explor1"))
+                                          HTML('<br/>'),
+                                          HTML('<br/>'),
+                                          uiOutput("explor1")),
+                                   
+                                   column(6,style = "background-color:#FFFFFF",
+                                         
+                                         h4("Project description", align = "justify"),
+                                         HTML('<br/>'),
+                                         textOutput("project_description")),
+                                   
+                                   column(2,style = "background-color:#FFFFFF",
+                                          h4("Analysis report", align = "justify"),
+                                          
+                                          HTML('<br/>'),
+                                          uiOutput('report_b'),
+                                          
+                                          )
                                    
                                    
                                    ),
                          
                           tabPanel("Visualization",
                                   
-                                   column(8,style = "background-color:#FFFFFF",
+                                   column(10, style = "background-color:#FFFFFF",
 
-                                          plotlyOutput('explor4', width =  '1100px', height = '650px')
+                                          plotlyOutput('explor4', height =  '600px')
 
-                                        ), column(2,offset = 2,
+                                        ), column(2,offset = 0,
                                                   
                                           uiOutput('explor3')
                                                   
@@ -223,13 +240,21 @@ ui <- dashboardPage(
                           tabPanel("Markers", 
                                    
                               
-                                    column(10,style = "background-color:#FFFFFF",
+                                    column(10, style = "background-color:#FFFFFF",
                                            
-                                           DTOutput('explor6', width =  '1100px')
+                                           DTOutput('explor6')
                                            
                                     ), column(2,offset = 0,
                                               
-                                              uiOutput('explor5')
+                                              uiOutput('explor5'),
+                                              HTML('<br/>'),
+                                              uiOutput('sub1'),
+                                              uiOutput('sub2'),
+                                              uiOutput('sub3')
+                                              
+                                              
+                                              
+                                              
                                               
                                     ),
                                    
@@ -238,7 +263,7 @@ ui <- dashboardPage(
                           tabPanel("Gene_viewer", 
                                    column(10,style = "background-color:#FFFFFF",
                                           
-                                          plotlyOutput('explor9', width =  '1100px', height = '650px')
+                                          plotlyOutput('explor9',  height =  '600px')
                                           
                                    ), column(2,offset = 0,
                                              
@@ -258,16 +283,7 @@ ui <- dashboardPage(
                                          )
                                    
                                    
-                          ), tabPanel("Report", 
-                                      column(12,style = "background-color:#FFFFFF",
-                                             
-                                             # htmlOutput("explor2"),
-                                             
-                                             
-                                      )
-                                      
-                                      
-                          ),
+                          )
                                    
                                
                          
@@ -286,6 +302,23 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output, session) {
+  
+  
+  observeEvent(input$status, {
+    if (input$status == 'disease') {
+      output$disease_name <- renderUI({
+        textInput("disease_name", "Disease name", 
+                  value = "", placeholder = 'Alzheimer, Ovarian cancer, ...')
+        
+      })
+    } else {
+      
+      output$disease_name <- renderUI({
+        })
+      
+    }
+  })
+  
   
   observeEvent(input$start, {
     
@@ -337,6 +370,13 @@ server <- function(input, output, session) {
       file.copy(inFile$datapath, file.path(destDir, inFile$name) )
     }
     
+    
+    if (input$status != 'disease') {
+      disease_name = ''
+    } else {
+      disease_name = input$disease_name
+    }
+    
     conf = paste0(
       'author=', as.character(input$user), '\n',
       'email=', as.character(input$email), '\n',
@@ -347,6 +387,7 @@ server <- function(input, output, session) {
       'tissue=', as.character(input$tissue), '\n',
       'tissue_affiliation=', as.character(gsub(pattern = ' ', '_', x =  input$affiliation)), '\n',
       'cell_disease_status=', as.character(input$status), '\n',
+      'disease_name=', as.character(disease_name), '\n',
       'cell_development_status=', as.character(input$development) ,' \n',
       'data_format=', as.character(input$input) ,' \n',
       'library=', as.character(input$library) ,' \n',
@@ -354,7 +395,8 @@ server <- function(input, output, session) {
       'READS_LENGHT=', as.character(input$reads) ,' \n',
       'id=', as.character(code) ,'\n',
       'directory_name=',directory, '\n',
-      'cell=',input$cell_n
+      'cell=',input$cell_n, '\n',
+      'description=',as.character(input$description)
       
     )
     
@@ -393,6 +435,7 @@ server <- function(input, output, session) {
     iv$add_rule('source', sv_required())
     iv$add_rule('files', sv_required())
     iv$add_rule('cell_n', sv_required())
+    iv$add_rule('disease_name', sv_required())
     iv$enable()
     
     if (length(input$cell_n) > 0 && length(input$files) > 0 && length(input$user) > 0 && length(input$project_name) > 0 && length(input$description) > 0 && length(input$affiliation) > 0 && length(input$email) > 0 && grepl('@', input$email) && length(input$source) > 0) {
@@ -552,6 +595,7 @@ server <- function(input, output, session) {
       list$status[n] <- sub('__.*', '', gsub('.*cell_development_status-', '', file))
       tmp <-  read.csv(file.path('../../validated',file, 'config'), sep = '=', header = FALSE)
       list$cells[n] <- gsub('/', '', tmp$V2[tmp$V1 == 'cells_after_qc'])
+      list$disease_name[n] <- stringr::str_to_title(tmp$V2[tmp$V1 == 'disease_name'])
       list$subclasses[n] <- gsub('/', '', tmp$V2[tmp$V1 == 'subclasses_number'])
       list$subtypes[n] <- gsub('/', '', tmp$V2[tmp$V1 == 'subtypes_number'])
       list$action[n] <- sub('__.*', '', gsub('.*id-', '', file))
@@ -582,7 +626,8 @@ server <- function(input, output, session) {
                   button = sapply(df$action, button("df")), 
                   stringsAsFactors = FALSE)
     
-    df <- df[colnames(df)]
+    df <- df[, c('id', 'species', 'sex', 'tissue', 'affiliation', 'disease', 'disease_name', 'status', 'cells', 'subclasses', 'subtypes', 'button')]
+    colnames(df) <- c('id', 'species', 'sex', 'tissue', 'affiliation', 'disease', 'disease_name', 'status', 'cells', 'subclasses', 'subtypes', 'action')
     
 
     species <- c()
@@ -658,71 +703,53 @@ server <- function(input, output, session) {
                           choices = status, selected = 'all')) })
 
     
-    observeEvent(input$species_filter, {
+    observeEvent(c(input$species_filter, input$sex_filter, input$tissue_filter, input$affiliation_filter, input$disease_filter, input$status_filter), {
     
+    values$df <- df
+      
     if (input$species_filter != 'all') {
-      values$df <- df
+      
       values$df <- values$df[values$df$species %in% input$species_filter,]
   
       
-    } else {
-      values$df <- df
+    } 
       
-     
-      
-      }
-    })
-    
-    
-    observeEvent(input$sex_filter, {
     if (input$sex_filter != 'all') {
-      values$df <- df
+     
       values$df <- values$df[values$df$sex %in% input$sex_filter,]
-    } else {
-      values$df <- df
-      }
-    })
+    }
     
-    observeEvent(input$tissue_filter, {
+   
     if (input$tissue_filter != 'all') {
-      values$df <- df
+      
       values$df <- values$df[values$df$tissue %in% input$tissue_filter,]
-    } else {
-      values$df <- df
-      }
-    })
+    }
     
-    observeEvent(input$affiliation_filter, {
+   
     if (input$affiliation_filter != 'all') {
-      values$df <- df
+     
       values$df <- values$df[values$df$affiliation %in% input$affiliation_filter,]
-    } else {
-      values$df <- df
-      }
-    })
+    } 
     
-    observeEvent(input$disease_filter, {
+    
     if (input$disease_filter != 'all') {
-      values$df <- df
+      
       values$df <- values$df[values$df$disease %in% input$disease_filter,]
-    } else { 
-      values$df <- df}
-    })
+    } 
     
-    observeEvent(input$status_filter, {
+  
     if (input$status_filter != 'all') {
-      values$df <- df
+      
       values$df <- values$df[values$df$status %in% input$status_filter,]
-    } else {
-      values$df <- df
-      }
+    } 
+    
     })
     
     
     
    
        output$my_datatable <- DT::renderDataTable(values$df,
-                                               server = FALSE, escape = FALSE, selection = 'none')
+                                               server = FALSE, escape = FALSE, selection = 'none', rownames = FALSE)
 
 
 
@@ -733,17 +760,29 @@ server <- function(input, output, session) {
          row <- splitID[3]
         
        
-         txt <- read.csv(file.path('../../validated',list.files('../../validated/')[grep(row, list.files('../../validated/'))], 'config'), sep = '=', header = FALSE)
-         txt <- txt[txt$V1 %in% c('author', 'project_name','email', 'source', 'sex', 'species', 'tissue', 'tissue_affiliation', 'cell_disease_status', 'cell_development_status', 'library', 'READS_LENGTH', 'cells_after_qc', 'subclasses_number', 'subtypes_number'),]
-         text = ''
-         for (d in 1:nrow(txt)) {
-           text <- paste0(text, as.character(txt$V1[d]), ':', as.character(txt$V2[d]), '<br/>')
-         }
+         info <- read.csv(file.path('../../validated',list.files('../../validated/')[grep(row, list.files('../../validated/'))], 'config'), sep = '=', header = FALSE)
+         output$project_description <- renderText({HTML(info$description)})
+         info <- info[info$V1 %in% c('author', 'email', 'source', 'species', 'sex', 'tissue', 'tissue_affiliation', 'cell_disease_status', 'cell_development_status', 'cells_after_qc', 'subclasses_number', 'subtypes_number'),]
+         info$V1 <- toupper(info$V1)
+         info$V2 <- gsub('/', '', info$V2)
+         colnames(info) <- c('Data information:', '')
+         
          
          # output$info_out 
          
-         output$explor1 <- renderText({HTML(text, sep="<br/>") })
-         output$explor2 <- renderUI({includeHTML(file.path('../../validated/', list.files('../../validated/')[grep(row, list.files('../../validated/'))], 'Report.html'))})
+         output$explor1 <-  renderTable({info})
+         
+         
+         output$report_b <- renderUI({
+           
+           actionButton("report", 'View report', icon = icon('report'))
+           
+         })
+                                                
+         observeEvent(input$report, {
+           
+         browseURL(file.path('../../validated/', list.files('../../validated/')[grep(row, list.files('../../validated/'))], 'Report.html'))})
+         
 
          
          path = file.path('../../validated/', list.files('../../validated/')[grep(row, list.files('../../validated/'))], 'data.h5')
@@ -809,11 +848,81 @@ server <- function(input, output, session) {
 
          observeEvent(input$markers_var, {
            if (input$markers_var == 1) {
+             
+             subclass_markers <- h5read(path, "markers/subclass_markers")
+             
+             clusters_sub <- c('all', unique(subclass_markers$cluster))
+             names(clusters_sub) <- clusters_sub
+             subclass_sub <- c('all', unique(subclass_markers$subclass))
+             names(subclass_sub) <- subclass_sub
+             
+             
+             output$sub1 <- renderUI({selectInput('cluster_sub', 'Cluster:', choices = clusters_sub, selected = 'all', multiple = FALSE, selectize = TRUE)})
+             output$sub2 <- renderUI({selectInput('subclass_sub', 'Subclass:', choices = subclass_sub, selected = 'all', multiple = FALSE, selectize = TRUE)})
+             output$sub3 <- renderUI({selectInput('pval_sub', 'p_value:', choices = list('0.05' = 0.05, '0.01' = 0.01, '0.001' = 0.001, '0.0001' = 0.0001), selected = 0.05, multiple = FALSE, selectize = TRUE)})
+             
+         
+             observeEvent(c(input$cluster_sub,input$subclass_sub, input$pval_sub), {
+               
+               if (input$cluster_sub != 'all' && input$subclass_sub != 'all' && input$pval_sub != 'all') {
+                 
+                 values$subclass_markers <- subclass_markers
+                 values$subclass_markers <- values$subclass_markers[as.character(values$subclass_markers$cluster) %in% as.character(input$cluster_sub),]
+                 values$subclass_markers <- values$subclass_markers[as.numeric(values$subclass_markers$p_val) <= as.numeric(input$pval_sub),]
+                 values$subclass_markers <- values$subclass_markers[as.character(values$subclass_markers$subclass) %in% as.character(input$subclass_sub),]
+                 
+                 
+               } else  if (input$cluster_sub == 'all' && input$subclass_sub != 'all' && input$pval_sub != 'all') {
+                 
+                 values$subclass_markers <- subclass_markers
+                 values$subclass_markers <- values$subclass_markers[as.numeric(values$subclass_markers$p_val) <= as.numeric(input$pval_sub),]
+                 values$subclass_markers <- values$subclass_markers[as.character(values$subclass_markers$subclass) %in% as.character(input$subclass_sub),]
+                 
+                 
+               } else  if (input$cluster_sub == 'all' && input$subclass_sub == 'all' && input$pval_sub != 'all') {
+                 
+                 values$subclass_markers <- subclass_markers
+                 values$subclass_markers <- values$subclass_markers[as.numeric(values$subclass_markers$p_val) <= as.numeric(input$pval_sub),]
+                 
+                 
+               } else  if (input$cluster_sub == 'all' && input$subclass_sub != 'all' && input$pval_sub == 'all') {
+                 
+                 values$subclass_markers <- subclass_markers
+                 values$subclass_markers <- values$subclass_markers[as.character(values$subclass_markers$subclass) %in% as.character(input$subclass_sub),]
+                 
+                 
+               } else  if (input$cluster_sub != 'all' && input$subclass_sub == 'all' && input$pval_sub == 'all') {
+                 
+                 values$subclass_markers <- subclass_markers
+                 values$subclass_markers <- values$subclass_markers[as.character(values$subclass_markers$cluster) %in% as.character(input$cluster_sub),]
 
+               } else  if (input$cluster_sub != 'all' && input$subclass_sub != 'all' && input$pval_sub == 'all') {
+                 
+                 values$subclass_markers <- subclass_markers
+                 values$subclass_markers <- values$subclass_markers[as.character(values$subclass_markers$cluster) %in% as.character(input$cluster_sub),]
+                 values$subclass_markers <- values$subclass_markers[as.character(values$subclass_markers$subclass) %in% as.character(input$subclass_sub),]
+                 
+                 
+               } else  if (input$cluster_sub != 'all' && input$subclass_sub == 'all' && input$pval_sub != 'all') {
+                 
+                 values$subclass_markers <- subclass_markers
+                 values$subclass_markers <- values$subclass_markers[as.character(values$subclass_markers$cluster) %in% as.character(input$cluster_sub),]
+                 values$subclass_markers <- values$subclass_markers[as.numeric(values$subclass_markers$p_val) <= as.numeric(input$pval_sub),]
 
-
+               }  else  if (input$cluster_sub == 'all' && input$subclass_sub == 'all' && input$pval_sub == 'all') {
+                 
+                 values$subclass_markers <- subclass_markers
+                 
+               } 
+             })
+             
+             
+             
+             
+             
+             
              output$explor6 <- DT::renderDataTable({
-                    datatable(h5read(path, "markers/subclass_markers"), options = list(pageLength = 15),
+                    datatable(values$subclass_markers, options = list(pageLength = 10),
                               rownames= FALSE)
 
              })
@@ -821,10 +930,51 @@ server <- function(input, output, session) {
 
 
            } else if (input$markers_var == 2) {
+             
+             
+             subtypes_markers <- h5read(path, "markers/subtypes_markers")
+             
+             clusters_typ <- c('all', unique(subtypes_markers$subtypes))
+             names(clusters_typ) <- clusters_typ
+             
+             
+             
+             output$sub1 <- renderUI({selectInput('subtypes_sub', 'Subtype:', choices = clusters_typ, selected = 'all', multiple = FALSE, selectize = TRUE)})
+             output$sub2 <- renderUI({selectInput('pval_typ', 'p_value:', choices = list('0.05' = 0.05, '0.01' = 0.01, '0.001' = 0.001, '0.0001' = 0.0001), selected = 0.05, multiple = FALSE, selectize = TRUE)})
+             output$sub3 <- renderUI({})
+             
+             
+             observeEvent(c(input$subtypes_sub, input$pval_typ), {
+               
+               if (input$subtypes_sub == 'all' && input$pval_typ == 'all') {
+                 
+                 values$subtypes_markers <- subtypes_markers
+                
+               } else  if (input$subtypes_sub == 'all' && input$pval_typ != 'all') {
+                 
+                 values$subtypes_markers <- subtypes_markers
+                 values$subtypes_markers <- values$subtypes_markers[as.numeric(values$subtypes_markers$p_val) <= as.numeric(input$pval_typ),]
+                 
+               } else  if (input$subtypes_sub != 'all' && input$pval_typ == 'all') {
+                 
+                 values$subtypes_markers <- subtypes_markers
+                 values$subtypes_markers <- values$subtypes_markers[as.character(values$subtypes_markers$subtypes) %in% as.character(input$subtypes_sub),]
+
+               } else  if (input$subtypes_sub != 'all' && input$pval_typ != 'all') {
+                 values$subtypes_markers <- subtypes_markers
+                 values$subtypes_markers <- values$subtypes_markers[as.character(values$subtypes_markers$subtypes) %in% as.character(input$subtypes_sub),]
+                 values$subtypes_markers <- values$subtypes_markers[as.numeric(values$subtypes_markers$p_val) <= as.numeric(input$pval_typ),]
+                 
+               }
+             })
+             
+             
+           
+            
 
 
              output$explor6 <- DT::renderDataTable({
-               datatable(h5read(path, "markers/subtypes_markers"), options = list(pageLength = 15),
+               datatable(values$subtypes_markers, options = list(pageLength = 10),
                          rownames= FALSE)
 
              })
@@ -832,10 +982,79 @@ server <- function(input, output, session) {
 
 
            } else if (input$markers_var == 3) {
+             
 
-
+             cssg_markers <- h5read(path, "markers/CSSG")
+             
+             clusters_c <- c('all', unique(cssg_markers$cluster))
+             names(clusters_c) <- clusters_c
+             subclass_c <- c('all', unique(cssg_markers$subclass))
+             names(subclass_c) <- subclass_c
+             
+             
+             output$sub1 <- renderUI({selectInput('cluster_c', 'Cluster:', choices = clusters_c, selected = 'all', multiple = FALSE, selectize = TRUE)})
+             output$sub2 <- renderUI({selectInput('subclass_c', 'Subclass:', choices = subclass_c, selected = 'all', multiple = FALSE, selectize = TRUE)})
+             output$sub3 <- renderUI({selectInput('pval_c', '% unexplained cells:', choices = list('5%' = 0.05, '1%' = 0.01, '0,1%' = 0.001, '0,001%' = 0.0001), selected = 0.1, multiple = FALSE, selectize = TRUE)})
+             
+             
+             
+             observeEvent(c(input$cluster_c, input$subclass_c, input$pval_c), {
+           
+               
+               if (input$cluster_c != 'all' && input$subclass_c != 'all' && input$pval_c != 'all') {
+                 
+                 values$cssg_markers <- cssg_markers
+                 values$cssg_markers <- values$cssg_markers[as.character(values$cssg_markers$cluster) %in% as.character(input$cluster_c),]
+                 values$cssg_markers <- values$cssg_markers[as.numeric(values$cssg_markers$loss_pval) <= as.numeric(input$pval_c),]
+                 values$cssg_markers <- values$cssg_markers[as.character(values$cssg_markers$subclass) %in% as.character(input$subclass_c),]
+                 
+                 
+               } else  if (input$cluster_c == 'all' && input$subclass_c != 'all' && input$pval_c != 'all') {
+                 
+                 values$cssg_markers <- cssg_markers
+                 values$cssg_markers <- values$cssg_markers[as.numeric(values$cssg_markers$loss_pval) <= as.numeric(input$pval_c),]
+                 values$cssg_markers <- values$cssg_markers[as.character(values$cssg_markers$subclass) %in% as.character(input$subclass_c),]
+                 
+                 
+               } else  if (input$cluster_c == 'all' && input$subclass_c == 'all' && input$pval_c != 'all') {
+                 
+                 values$cssg_markers <- cssg_markers
+                 values$cssg_markers <- values$cssg_markers[as.numeric(values$cssg_markers$loss_pval) <= as.numeric(input$pval_c),]
+                 
+                 
+               } else  if (input$cluster_c == 'all' && input$subclass_c != 'all' && input$pval_c == 'all') {
+                 
+                 values$cssg_markers <- cssg_markers
+                 values$cssg_markers <- values$cssg_markers[as.character(values$cssg_markers$subclass) %in% as.character(input$subclass_c),]
+                 
+                 
+               } else  if (input$cluster_c != 'all' && input$subclass_c == 'all' && input$pval_c == 'all') {
+                 
+                 values$cssg_markers <- cssg_markers
+                 values$cssg_markers <- values$cssg_markers[as.character(values$cssg_markers$cluster) %in% as.character(input$cluster_c),]
+                 
+               } else  if (input$cluster_c != 'all' && input$subclass_c != 'all' && input$pval_c == 'all') {
+                 
+                 values$cssg_markers <- cssg_markers
+                 values$cssg_markers <- values$cssg_markers[as.character(values$cssg_markers$cluster) %in% as.character(input$cluster_c),]
+                 values$cssg_markers <- values$cssg_markers[as.character(values$cssg_markers$subclass) %in% as.character(input$subclass_c),]
+                 
+                 
+               } else  if (input$cluster_c != 'all' && input$subclass_c == 'all' && input$pval_c != 'all') {
+                 
+                 values$cssg_markers <- cssg_markers
+                 values$cssg_markers <- values$cssg_markers[as.character(values$cssg_markers$cluster) %in% as.character(input$cluster_c),]
+                 values$cssg_markers <- values$cssg_markers[as.numeric(values$cssg_markers$loss_pval) <= as.numeric(input$pval_c),]
+                 
+               }  else  if (input$cluster_c == 'all' && input$subclass_c == 'all' && input$pval_c == 'all') {
+                 
+                 values$cssg_markers <- cssg_markers
+                 
+               } 
+             })
+             
             output$explor6 <- DT::renderDataTable({
-               datatable(h5read(path, "markers/CSSG"), options = list(pageLength = 15),
+               datatable(values$cssg_markers, options = list(pageLength = 5),
                          rownames= FALSE)
 
              })
