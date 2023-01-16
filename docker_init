@@ -1,11 +1,8 @@
 #!/bin/bash  
 
-
-
 source $(pwd)/setup/docker_id
 id=$id
 
-
-docker run --privileged --rm -i --env-file ./$1 -v $(pwd):/app/JSEQ_server $id
+docker run --rm -i --env-file ./$1 -v $(pwd):/app/JSEQ_server $id
 	
 	

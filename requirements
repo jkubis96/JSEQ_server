@@ -1,0 +1,34 @@
+#!/bin/bash 
+
+function enviroment {
+
+sudo apt-get update
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
+sudo add-apt-repository 'deb [arch=amd64,i386] https://cran.rstudio.com/bin/linux/ubuntu xenial/'
+sudo apt-get update
+sudo apt-get -y install r-base=3.6.3-2
+sudo apt-get -y install curl
+sudo apt-get -y install openssl
+sudo apt-get -y install libcurl4-openssl-dev
+sudo apt-get -y install libhdf5-dev
+sudo apt-get -y install libhdf5-serial-dev
+sudo apt-get -y install h5utils
+sudo apt-get -y install hdf5-tools
+sudo apt-get -y install hdf5-helpers
+sudo apt-get -y install r-cran-httr=1.4.1-1ubuntu1
+sudo apt-get -y install r-cran-leiden=0.3.3+dfsg-1
+sudo apt-get -y install r-cran-igraph=1.2.4.2-2build1
+sudo apt-get -y install r-cran-biocmanager
+sudo apt-get install -y libpq-dev
+sudo apt-get update
+r_req=$(pwd)
+sudo -i Rscript $r_req/setup/r_req.R 
+sudo apt-get -y isntall gdebi
+sudo apt-get update
+wget https://download1.rstudio.org/electron/bionic/amd64/rstudio-2022.12.0-353-amd64.deb
+sudo gdebi rstudio-2022.12.0-353-amd64.deb
+sudo rm rstudio-2022.12.0-353-amd64.deb
+sudo apt-get install -y libgbm-dev
+sudo apt-get update
+
+}

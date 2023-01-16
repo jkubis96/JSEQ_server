@@ -31,7 +31,12 @@ echo ''
 
 if [[ $s == 'install' ]]
 then
-		log_install=$(pwd)/setup/install.log.out
+	
+	log_install=$(pwd)/setup/install.log.out
+		
+	source $(pwd)/requirements
+	
+	enviroment  >> $log_install 2>&1
 	
 	sudo apt-get -y install unzip >> $log_install 2>&1
 	
@@ -45,12 +50,29 @@ then
 
 	cd ..
 	
-	echo -e "\033[0;31m $(date) Docker build starting..."
-	sudo docker build -t jseq_server -f Dockerfile_admin .
-	id=$(docker images --format "{{.ID}}" jseq_server)
+	echo -e "\033[0;31m $(date) Docker admin build starting..."
+	sudo docker build -t jseq_admin -f Dockerfile_admin .
+	id=$(docker images --format "{{.ID}}" jseq_admin)
 	echo $id
 	echo id=$id > $(pwd)/setup/docker_id_admin
-	sudo docker run --privileged --rm -it -v $(pwd):/app/JSEQ_server $id
+	
+		
+	echo -e "\033[0;31m $(date) Docker server build starting..."
+	sudo docker build -t jseq_server -f Dockerfile .
+	id=$(docker images --format "{{.ID}}" jseq_server)
+	echo $id
+	echo id=$id > $(pwd)/setup/docker_id
+	
+	
+	source $(pwd)/requirements_file/system_files
+	sudo docker pull postgres:12
+	sudo docker run --name jbdb_sql --restart always -e PGDATA=/var/lib/postgresql/data/pgdata -e POSTGRES_USER=$sys4 -e POSTGRES_PASSWORD=$sys4 -e  POSTGRES_DB=jbsda -v /sql:/var/lib/postgresql/data --name postgresql -p 5432:5432 -d postgres:12
+	
+	
+	start
+	
+	
+	
 		
 elif [[ $s == 'start' ]]
 then
@@ -65,11 +87,13 @@ elif [[ $s == 'queue' ]]
 then
 
 	nohup python3 $(pwd)/scripts/queue.py $(pwd)/tasks > nohup_log 2>&1 &
+	start
 	
 elif [[ $s == 'app' ]]
 then
 
-	nohup R -e "shiny::runApp('html/main/main.R', port = 1111, host = '127.0.0.1')" &	
+	nohup R -e "shiny::runApp('app/main/main.R', port = 1111, host = 'localhost')" &	
+	start
 	
 	
 elif [[ $s == 'q' ]]
