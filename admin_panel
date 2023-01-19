@@ -92,7 +92,7 @@ then
 elif [[ $s == 'app' ]]
 then
 
-	nohup R -e "shiny::runApp('app/main/main.R', port = 1111, host = 'localhost')" &	
+	nohup R -e "shiny::runApp('app/main/main.R', port = 1111, host = '127.0.0.1')" &	
 	start
 	
 	

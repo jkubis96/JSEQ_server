@@ -1073,7 +1073,7 @@ server <- function(input, output, session) {
     iv$add_rule('disease_name', sv_required())
     iv$enable()
     
-    if (length(input$cell_n) > 0 && length(input$files) > 0 && length(input$project_name) > 0 && length(input$description) > 0 && length(input$affiliation) > 0 && length(input$email) > 0 && grepl('@', input$email) && length(input$source) > 0) {
+    if (length(input$cell_n) > 0 && length(input$files) > 0 && length(input$project_name) > 0 && length(input$description) > 0 && length(input$affiliation) > 0 && length(input$source) > 0) {
         
       
       output$run_buttom <- renderUI({

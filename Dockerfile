@@ -96,10 +96,6 @@ RUN cd JSEQ_server/setup \
 RUN sudo apt-get update -y
 
 
-RUN mkdir $(pwd)/JSEQ_server/projects
-RUN sudo chmod +rwx $(pwd)/JSEQ_server/projects
-RUN mkdir $(pwd)/JSEQ_server/results
-RUN sudo chmod +rwx $(pwd)/JSEQ_server/results
 
 
 WORKDIR /app/JSEQ_server
