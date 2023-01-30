@@ -24,7 +24,7 @@ smtp.login(str(sys1), str(sys2))
 
 msg = MIMEMultipart()
 msg['Subject'] = 'JBSDA - analysis finished'
-text = 'Your analysis ' + str(project_name) + ' in JBioSystem - Platforma Database & Analytic has finished. Your validation code: \n<strong>' + str(id) + '</strong> \nNow go to the JBSDA platform and check the results in Validate tab\nGreetings JBioSystem'
+text = 'Your analysis ' + str(project_name) + ' in JBioSystem - Platforma Database & Analytic has finished. Your validation code: \n' + str(id) + '\nNow go to the JBSDA platform and check the results in Validate tab\nGreetings JBioSystem'
 msg.attach(MIMEText(text))
 
 

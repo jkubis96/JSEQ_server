@@ -1,21 +1,22 @@
 install.packages('rlang')
 remotes::install_github("stla/NestedMenu")
+install.packages('leaflet')
+install.packages('maps')
 
 
 setwd('/mnt/c/Users/merag/Git/JSEQ_server/app/main')
 library(shiny)
 
 runApp("main.R", launch.browser = TRUE, port = 8001, )
-shiny::runApp('main.R', port = 1111, host = 'localhost')
+
 
 
 
 library("DBI")
-#install.packages('RPostgreSQL')
 library("RPostgreSQL")
 drv <- dbDriver("PostgreSQL")
 connec <- dbConnect(drv, 
-                    dbname = 'jbdb',
+                    dbname = 'jbsda',
                     host = 'localhost', 
                     port = '5432',
                     user = 'admin', 
@@ -69,11 +70,26 @@ dbGetQuery(connec, 'CREATE TABLE users (
 );')
 
 
+dbGetQuery(connec, 'CREATE TABLE downloads (
+  action_id serial PRIMARY KEY, 
+	user_name VARCHAR ( 500 ) NOT NULL,
+  set_id VARCHAR ( 20 ) NOT NULL,
+  date VARCHAR ( 100 ) NOT NULL
 
+
+);')
+USER = 'd'
+row = 'f'
+
+dbGetQuery(connec, paste0("INSERT INTO users (user_name, set_id, date) VALUES ('",USER,"','" , row, "','" , Sys.time(),"');"))
+dbGetQuery(connec, paste0("INSERT INTO downloads (user_name, set_id, date) VALUES ('",account_data$USER,"','" , row, "','" , Sys.time(),"');"))
+
+
+dbGetQuery(connec, paste("INSERT INTO users (user_name, set_id, date) VALUES (",account_data$USER, row, Sys.time(),");", sep = ","))
 
 ## FOR FUTURE
 
-df2 <- dbGetQuery(connec, 'SELECT * FROM users;')
+df2 <- dbGetQuery(connec, 'SELECT * FROM downloads;')
 
 dbGetQuery(connec, paste0("SELECT password FROM users WHERE user_name = '",g,"';"))[[1]]
 
@@ -81,7 +97,7 @@ dbGetQuery(connec, paste0("SELECT password FROM users WHERE user_name = '",g,"';
 dbGetQuery(connec, paste("INSERT INTO users (name, surname, email, affiliation, country, ORCID, links, user_name, password, RODO, acc_type) VALUES ('fname', 'surnamef', 'emafffil', 'affiliation', 'counfftry', 'ORCffffID', 'links', 'user_name', 'password', 'RODO', 'dd');", sep = ","))
 
 
-dbGetQuery(connec, 'DROP TABLE users;')
+dbGetQuery(connec, 'DROP TABLE downloads;')
 
 
 

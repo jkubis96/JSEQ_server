@@ -19,6 +19,9 @@ install.packages('sodium')
 install.packages('shinydashboardPlus')
 install.packages('rlang')
 install.packages('plotly')
+install.packages('leaflet')
+install.packages('maps')
+
 
 remotes::install_github("stla/NestedMenu")
 

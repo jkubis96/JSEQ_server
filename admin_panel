@@ -66,7 +66,7 @@ then
 	
 	source $(pwd)/requirements_file/system_files
 	sudo docker pull postgres:12
-	sudo docker run --name jbdb_sql --restart always -e PGDATA=/var/lib/postgresql/data/pgdata -e POSTGRES_USER=$sys4 -e POSTGRES_PASSWORD=$sys4 -e  POSTGRES_DB=jbsda -v /sql:/var/lib/postgresql/data --name postgresql -p 5432:5432 -d postgres:12
+	sudo docker run --name jbsda_sql --restart always -e PGDATA=/var/lib/postgresql/data/pgdata -e POSTGRES_USER=$sys4 -e POSTGRES_PASSWORD=$sys4 -e  POSTGRES_DB=jbsda -p 5432:5432 -d postgres:12
 	
 	
 	start
@@ -92,6 +92,7 @@ then
 elif [[ $s == 'app' ]]
 then
 
+	nohup sudo -i Rscript $(pwd)/app/main/db_init.R &
 	nohup R -e "shiny::runApp('app/main/main.R', port = 1111, host = '127.0.0.1')" &	
 	start
 	

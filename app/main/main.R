@@ -12,6 +12,8 @@ library("RPostgreSQL")
 library("DBI")
 library(sodium)
 library(shinydashboardPlus)
+library(leaflet)
+library(maps)
 
 
 
@@ -21,19 +23,12 @@ options(shiny.maxRequestSize = 300000*1024^2)
 
 sys <- read.csv('../../requirements_file/system_files', sep = '=', header = F)
 
-drv <- dbDriver("PostgreSQL")
-connec <- dbConnect(drv, 
-                    dbname = 'jbsda',
-                    host = 'localhost', 
-                    port = '5432',
-                    user = sys$V2[sys$V1 == 'sys4'], 
-                    password = sys$V2[sys$V1 == 'sys4'])
-
 
 
 
 
 ui <- dashboardPage(
+  
   skin = "purple",
   dashboardHeader(title = ("JBSDA"), tags$li(class = 'dropdown' ,uiOutput('acc'))),
   footer = dashboardFooter(
@@ -195,7 +190,11 @@ ui <- dashboardPage(
               fluidRow(
                 
                 column(3, 
-                       h4("Project", align = "left"),
+                       br(),
+                       uiOutput('login_element1_validation'),
+                       br(),
+                       uiOutput('login_element2_validation'),
+                       br(),
                        textInput("id_code", "Project ID", 
                                  value = "", placeholder = '10-character code'),
                        
@@ -211,20 +210,22 @@ ui <- dashboardPage(
                         actionButton("val", "Validate", icon = icon('edit')),
                   
                   
-                        HTML(paste('','',
-                             'Data validation.',
-                             'If the output of the analysis is appropriate you can share data for other users. If you choose "Yes" the data will be available in "Data exploration" tab where you can obtain more data [analysis output files in hdf5 formats]. The data can be always removed after contact with us. If you choose "No" data will be removed. If you will not make choice the data will remove in a few days.', sep="<br/>"))
-                  
-                       
-                      
+                   
                        
                        
                 ),
                 
-                column(8,style = "background-color:#FFFFFF",
-                       h4("Results", align = "left"),
-                       uiOutput("project_validation", inline = TRUE)
+                column(4,style = "background-color:#FFFFFF",
+                      uiOutput("project_validation"),
+                      
                     
+                       
+                ),
+                column(4, 
+                       uiOutput("project_validation_report", inline = TRUE),
+                       br(),
+                       uiOutput('disclaimer')
+                       
                        
                 ))
               
@@ -259,21 +260,39 @@ ui <- dashboardPage(
                                           HTML('<br/>'),
                                           tableOutput("explor1")),
                                    
-                                   column(6,style = "height:600px;background-color:#FFFFFF",
+                                   column(5,style = "height:600px;background-color:#FFFFFF",
                                          
-                                         h4("Project description", align = "justify"),
-                                         HTML('<br/>'),
-                                         HTML('Author:'),
-                                         uiOutput('user_check_button'),
-                                         HTML('<br/>'),
-                                         textOutput("project_description")),
+                                          
+                                          uiOutput('pd'),
+                                          
+                                          uiOutput('au'),
+                                          
+                                          uiOutput('user_check_button'),
+                                          
+                                         
+                                          textOutput("project_description")
+                                       
+                                      
+                                         
+                                          ),
                                    
-                                   column(2,style = "height:600px;background-color:#FFFFFF",
-                                          h4("Analysis report", align = "justify"),
+                                   column(3,style = "height:600px;background-color:#FFFFFF",
+                                          uiOutput('ar'),
+                                          
                                           
                                           HTML('<br/>'),
                                           uiOutput('report_b'),
                                           
+                                          br(),
+                                          uiOutput('login_element1_download'),
+                                          br(),
+                                          uiOutput('login_element2_download'),
+                                          br(),
+                                          
+                                          uiOutput('down_butt'),
+                                          uiOutput('down_info'),
+                                          
+
                                           )
                                    
                                    
@@ -352,7 +371,12 @@ ui <- dashboardPage(
       ),
       
       tabItem(tabName = "contact",
-            
+              fluidRow(
+                column(4,),
+                column(5,offset = 3,
+                       leafletOutput("mymap")),
+              
+              )
               
       )
     )
@@ -360,6 +384,17 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output, session) {
+    
+  #location
+
+    cities <- as.data.frame(world.cities)
+    output$mymap <- renderLeaflet({
+      leaflet(options = leafletOptions(maxZoom = 6)) %>%
+        addProviderTiles(providers$Stamen.TonerLite,
+                         options = providerTileOptions(noWrap = TRUE)
+        ) %>%
+        addMarkers(data = cities[cities$name %in% 'Poznan',])
+    })
   
     account_data <- reactiveValues()
     account_data$USER = NULL
@@ -378,7 +413,42 @@ server <- function(input, output, session) {
      
      })
     
-    #login before analysis & explore
+    
+    observeEvent(input$login_header, {
+      
+      
+      showModal(modalDialog(
+        
+        title = 'Login account',
+        br(),
+        textInput("log_login", "Login", 
+                  value = "", placeholder = 'User'),
+        passwordInput("log_password", "Password", 
+                      value = "", placeholder = 'min. 8-character password'),
+        
+        checkboxInput('robot', 'I am not a robot!', value = FALSE),
+        br(),
+        
+        uiOutput('decision_log'),
+        actionButton('login_button', 'Login', width = '300px'), 
+        br(),
+        br(),
+        actionButton('remind', 'Remind password', width = '300px'), size = 'xl',
+        
+        
+        
+        
+        
+      ) 
+      )
+      
+      
+      
+      
+      
+    })
+    
+    #login before analysis 
     
     output$login_element1 <- renderUI({
       
@@ -388,78 +458,142 @@ server <- function(input, output, session) {
     
     output$login_element2 <- renderUI({
      
-      actionButton('log_analysis', 'Login', icon = icon('arrow-pointer'), width = '295px')
+      actionButton('log_analysis', 'Login', icon = icon('arrow-pointer'), width = '200px')
+      
+    })
+    
+    observeEvent(input$log_analysis, {
+      
+      
+      showModal(modalDialog(
+        
+        title = 'Login account',
+        br(),
+        textInput("log_login", "Login", 
+                  value = "", placeholder = 'User'),
+        passwordInput("log_password", "Password", 
+                      value = "", placeholder = 'min. 8-character password'),
+        
+        checkboxInput('robot', 'I am not a robot!', value = FALSE),
+        br(),
+        
+        uiOutput('decision_log'),
+        actionButton('login_button', 'Login', width = '300px'), 
+        br(),
+        br(),
+        actionButton('remind', 'Remind password', width = '300px'), size = 'xl',
+        
+        
+        
+        
+        
+      ) 
+      )
       
     })
     
     
-   observeEvent(input$login_header, {
-
-       
-       showModal(modalDialog(
-         
-         title = 'Login account',
-         br(),
-         textInput("log_login", "Login", 
-                   value = "", placeholder = 'User'),
-         passwordInput("log_password", "Password", 
-                   value = "", placeholder = 'min. 8-character password'),
-         
-         checkboxInput('robot', 'I am not a robot!', value = FALSE),
-         br(),
-         
-         uiOutput('decision_log'),
-         actionButton('login_button', 'Login', width = '300px'), 
-         br(),
-         br(),
-         actionButton('remind', 'Remind password', width = '300px'), size = 'xl',
-         
-         
-         
-         
-     
-          ) 
-        )
-     
-     
     
-       
-
-   })
-   
-   observeEvent(input$log_analysis, {
+    
+    #login before validation 
+    
+    output$login_element1_validation <- renderUI({
+      
+      HTML({'Login is required to validate'})
+      
+    })
+    
+    output$login_element2_validation <- renderUI({
+      
+      actionButton('log_validation', 'Login', icon = icon('arrow-pointer'), width = '200px')
+      
+    })
+    
+    observeEvent(input$log_validation, {
+      
+      
+      showModal(modalDialog(
+        
+        title = 'Login account',
+        br(),
+        textInput("log_login", "Login", 
+                  value = "", placeholder = 'User'),
+        passwordInput("log_password", "Password", 
+                      value = "", placeholder = 'min. 8-character password'),
+        
+        checkboxInput('robot', 'I am not a robot!', value = FALSE),
+        br(),
+        
+        uiOutput('decision_log'),
+        actionButton('login_button', 'Login', width = '300px'), 
+        br(),
+        br(),
+        actionButton('remind', 'Remind password', width = '300px'), size = 'xl',
+        
+        
+        
+        
+        
+      ) 
+      )
+      
+    })
+    
+    
+    #login before download
+    
+    login_values <- reactiveValues()
+    login_values$row <- NULL
+    login_values$login_element1_download <- renderUI({
+    
+      
+      HTML({'Login is required to download'})
+      
+    })
+    
+    login_values$login_element2_download <- renderUI({
+      
+      actionButton('log_download', 'Login', icon = icon('arrow-pointer'), width = '200px')
+      
+    })
+    
+    
+    
+    
+    
+    observeEvent(input$log_download, {
+      
+      
+      showModal(modalDialog(
+        
+        title = 'Login account',
+        br(),
+        textInput("log_login", "Login", 
+                  value = "", placeholder = 'User'),
+        passwordInput("log_password", "Password", 
+                      value = "", placeholder = 'min. 8-character password'),
+        
+        checkboxInput('robot', 'I am not a robot!', value = FALSE),
+        br(),
+        
+        uiOutput('decision_log'),
+        actionButton('login_button', 'Login', width = '300px'), 
+        br(),
+        br(),
+        actionButton('remind', 'Remind password', width = '300px'), size = 'xl',
+        
+        
+        
+        
+        
+      ) 
+      )
+      
+    })
+    
+    ########################################################################
      
-     
-     showModal(modalDialog(
-       
-       title = 'Login account',
-       br(),
-       textInput("log_login", "Login", 
-                 value = "", placeholder = 'User'),
-       passwordInput("log_password", "Password", 
-                 value = "", placeholder = 'min. 8-character password'),
-       
-       checkboxInput('robot', 'I am not a robot!', value = FALSE),
-       br(),
-       
-       uiOutput('decision_log'),
-       actionButton('login_button', 'Login', width = '300px'), 
-       br(),
-       br(),
-       actionButton('remind', 'Remind password', width = '300px'), size = 'xl',
-       
-       
-       
-       
-       
-     ) 
-     )
-     
-     
-     
-     
-     
-   })
+  
    
    observeEvent(input$login_button, {
      if (!toupper(input$log_login) %in% toupper(dbGetQuery(connec, 'SELECT user_login FROM users;')[[1]])) {
@@ -476,7 +610,25 @@ server <- function(input, output, session) {
        output$login_element1 <- renderUI({HTML( paste('<strong> User:', account_data$USER, '</strong>'))}) 
        output$login_element2 <- renderUI({HTML(paste('<strong> Email:', dbGetQuery(connec, paste0("SELECT email FROM users WHERE user_login = '", toupper(account_data$USER) ,"';"))[[1]], '</strong>'))}) 
        
+       output$login_element1_validation <- renderUI({HTML( paste('<strong> User:', account_data$USER, '</strong>'))}) 
+       output$login_element2_validation <- renderUI({HTML(paste('<strong> Email:', dbGetQuery(connec, paste0("SELECT email FROM users WHERE user_login = '", toupper(account_data$USER) ,"';"))[[1]], '</strong>'))}) 
        
+       login_values$login_element1_download <- renderUI({HTML( paste('<strong> User:', account_data$USER, '</strong>'))}) 
+       login_values$login_element2_download <- renderUI({HTML('You are logged in. You can download the files.')}) 
+       #TU
+       if (is.null(login_values$row)) {
+         login_values$down_butt <- renderUI({HTML(paste0('<br>', downloadButton('downloadData', label = "Download data")))})
+         login_values$login_element1_download <- renderUI({HTML( paste('<strong> User:', account_data$USER, '</strong>'))}) 
+         login_values$login_element2_download <- renderUI({HTML('You are logged in. You can download the files.')}) 
+
+       } else {
+         output$down_butt <- renderUI({HTML(paste0('<br>', downloadButton('downloadData', label = "Download data")))})
+         output$login_element1_download <- renderUI({HTML( paste('<strong> User:', account_data$USER, '</strong>'))}) 
+         output$login_element2_download <- renderUI({HTML('You are logged in. You can download the files.')}) 
+
+         
+         
+       }
        output$acc <- renderUI({dropdownButton(
          tags$h4("Account menu"),
          actionBttn('user_profil', 'Profil', icon = icon('circle-user'), size = 'md'),
@@ -557,15 +709,67 @@ server <- function(input, output, session) {
      
      output$login_element2 <- renderUI({
        
-       actionButton('log_analysis', 'Login', icon = icon('arrow-pointer'), width = '295px')
+       actionButton('log_analysis', 'Login', icon = icon('arrow-pointer'), width = '200px')
+       
+     })
+     
+     login_values$login_element1_download <- renderUI({
+       
+       HTML({'Login is required to download'})
+       
+     })
+     
+     login_values$login_element2_download <- renderUI({
+       
+       actionButton('log_download', 'Login', icon = icon('arrow-pointer'), width = '200px')
+       
+     })
+     
+     output$login_element1_validation <- renderUI({
+       
+       HTML({'Login is required to validate'})
+       
+     })
+     
+     output$login_element2_validation <- renderUI({
+       
+       actionButton('log_validation', 'Login', icon = icon('arrow-pointer'), width = '200px')
        
      })
      
      account_data$USER = NULL
      output$decision_log <- renderUI({HTML('Logout successful. You can login again')})
      
-   })
-   
+     output$down_butt <- renderUI({HTML('')})
+     
+     
+     if (!is.null(login_values$row)) {
+     output$login_element1_download <- renderUI({
+       
+       
+       HTML({'Login is required to download'})
+       
+     })
+     
+     output$login_element2_download <- renderUI({
+       
+       actionButton('log_download', 'Login', icon = icon('arrow-pointer'), width = '200px')
+       
+     })
+     
+     }
+     
+     login_values$row <- NA
+     
+     
+     
+     
+     
+  
+     })
+     
+     
+     
    
    
    
@@ -726,7 +930,7 @@ server <- function(input, output, session) {
        br(),
        
        uiOutput('decision_rem'),
-       actionButton('remind', 'Remind', width = '300px'),
+       actionButton('remind_action', 'Remind', width = '300px'),
        
        
        uiOutput('code_box'),
@@ -744,7 +948,7 @@ server <- function(input, output, session) {
    
    
    
-   observeEvent(input$remind, {
+   observeEvent(input$remind_action, {
       if (!toupper(input$remind_login) %in% toupper(dbGetQuery(connec, 'SELECT user_login FROM users;')[[1]])) {
        output$decision_rem <- renderUI({HTML('User does not exist')})
      } else if (!toupper(input$remind_email) %in% toupper(dbGetQuery(connec, 'SELECT email FROM users;'))[[1]]) {
@@ -754,7 +958,7 @@ server <- function(input, output, session) {
      } else  {
        output$decision_rem <- renderUI({HTML('A new password has been sent to your e-mail')})
 
-       samp<-c(2:9,letters,LETTERS,"!", "#")
+       samp<-c(2:9,letters,LETTERS)
        code_remind <- as.character(paste(sample(samp,8),collapse=""))
        
        dbGetQuery(connec, paste0("UPDATE users SET change_code = '",as.character(code_remind),"' WHERE user_login = '", toupper(input$remind_login) ,"';"))
@@ -908,8 +1112,8 @@ server <- function(input, output, session) {
          output$decision <- renderUI({HTML('Read the data policy and tick the box [x] if you agree')})
        } else  {
          output$decision <- renderUI({HTML('Account created successfully. You can login & start your analysis with data exploration')})
-         dbGetQuery(connec, paste0("INSERT INTO users (name, surname, email, affiliation, country, ORCID, links, user_name, user_login, password, RODO, acc_type, change_code) VALUES ('",input$user_name,"','" ,input$user_surname, "','" , input$user_email, "','" , input$user_affiliation, "','" , input$user_country, "','" , input$user_ORCID, "','" ,input$user_link, "','" , input$user_login, "','" , toupper(input$user_login), "','" , password_store(input$user_password), "','" , input$rodo,"', 'user', NULL);"))
-          
+         dbGetQuery(connec, paste0("INSERT INTO users (user_name, set_id, date) VALUES ('",account_data$USER,"','" , row, "','" , Sys.time(),"');"))
+         
          sys <- read.csv('../../requirements_file/system_files', sep = '=', header = F)
          c = paste('python3 $(pwd)/emails/account_create.py ', as.character(sys$V2[sys$V1 == 'sys1']), gsub('"', '', sys$V2[sys$V1 == 'sys2']), as.character(sys$V2[sys$V1 == 'sys3']) , as.character(input$user_email), as.character(input$user_login))
          
@@ -968,7 +1172,7 @@ server <- function(input, output, session) {
     CHECK <- TRUE
     
     while(CHECK) {
-      samp<-c(2:9,letters,LETTERS,"!", "#")
+      samp<-c(2:9,letters,LETTERS)
       code <- paste(sample(samp,10),collapse="")
       
       if (TRUE %in% grepl(pattern = code, x = list.files(file.path('../../projects'))) && TRUE %in% grepl(pattern = code, x = list.files(file.path('../../validated')))) {
@@ -1073,7 +1277,7 @@ server <- function(input, output, session) {
     iv$add_rule('disease_name', sv_required())
     iv$enable()
     
-    if (length(input$cell_n) > 0 && length(input$files) > 0 && length(input$project_name) > 0 && length(input$description) > 0 && length(input$affiliation) > 0 && length(input$source) > 0) {
+    if (!is.null(account_data$USER) && length(input$cell_n) > 0 && length(input$files) > 0 && length(input$project_name) > 0 && length(input$description) > 0 && length(input$affiliation) > 0 && length(input$source) > 0) {
         
       
       output$run_buttom <- renderUI({
@@ -1116,21 +1320,53 @@ server <- function(input, output, session) {
   
   observeEvent(input$search, {
 
-    if (nchar(input$id_code) == 10 && TRUE %in% grepl(pattern = input$id_code, x = list.files(file.path('../../projects')))) {
-      output$project_validation <- renderUI({
-        includeHTML(file.path('../../projects/', list.files(file.path('../../projects'))[grepl(pattern = input$id_code, x = list.files(file.path('../../projects')))], 'Report.html'))
+    if (!is.null(account_data$USER) && nchar(input$id_code) == 10 && TRUE %in% grepl(pattern = input$id_code, x = list.files(file.path('../../projects'))) && TRUE %in% grepl(pattern = 'SC_', x = list.files(file.path('../../projects')))) {
+      
+      
+      
+      
+      
+      output$project_validation <- renderTable({
+        
+        tmp <-  read.csv(file.path('../../projects/', list.files(file.path('../../projects'))[grepl(pattern = input$id_code, x = list.files(file.path('../../projects')))], 'config'), sep = '=', header = FALSE)
+        colnames(tmp) <- c('Variables', 'Value')
+        tmp$Value <- gsub('/', '', tmp$Value)
+        
+        tmp
         
         })
       
-
+      output$project_validation_report <- renderUI({
+        
+        actionButton("report_valid", 'View report', icon = icon('bars'))
+        
+        
+        })
+      
+      
+      output$disclaimer <- renderUI({
+        
+        
+        HTML(paste('Data validation.',
+                   'If the output of the analysis is appropriate you can share data for other users. If you choose "Yes" the data will be available in "Data exploration" tab where you can obtain more data [analysis output files in hdf5 formats]. The data can be always removed after contact with us. If you choose "No" data will be removed. If you will not make choice the data will remove in a few days.', sep="<br/>"))
+        
+        
+        })
+      
+     
 
     
+    } else if (is.null(account_data$USER)){
+      
+      output$disclaimer <- renderUI({ 
+        'Data validation required login ...'
+      })
+      
     } else {
       
       
-      output$project_validation <- renderUI({ 
-        HTML(paste('','',
-                   'No projects found.',
+      output$disclaimer <- renderUI({ 
+        HTML(paste('No projects found.',
                    'Possible scenarios:',
                    '-wrong project ID',
                    '-analysis failed due to poor data quality',
@@ -1147,6 +1383,16 @@ server <- function(input, output, session) {
     
     
   })
+  
+    
+  observeEvent(input$report_valid, {
+    
+    browseURL(file.path('../../projects/', list.files(file.path('../../projects'))[grepl(pattern = input$id_code, x = list.files(file.path('../../projects')))], 'Report.html'))
+    
+      
+      
+    })
+  
   
   
   observeEvent(input$val, {
@@ -1402,20 +1648,33 @@ server <- function(input, output, session) {
                                                server = FALSE, escape = FALSE, selection = 'none', rownames = FALSE)
 
 
-
+       
+       
+          
+          
        
          observeEvent(input[["button"]], {
          splitID <- strsplit(input[["button"]], "_")[[1]]
          tbl <- splitID[2]
          row <- splitID[3]
-        
+         login_values$row <- row
+         
+         
+         output$pd <- renderUI({HTML("<h4>Project description</h4> <br>")})
+         
+         
+         output$ar <- renderUI({h4("Analysis report")})
+         
+         
+         
+         
        
          info <- dbGetQuery(connec, paste0("SELECT * FROM sc_rna_seq where id='",row,"';"))
          
-         output$user_check_button <- renderUI({actionLink('user_check', as.character(dbGetQuery(connec, paste0("SELECT user_name FROM sc_rna_seq WHERE id = '", row ,"';"))[[1]]))})
+         output$user_check_button <- renderUI({HTML(paste0('Author: ', actionLink('user_check', as.character(dbGetQuery(connec, paste0("SELECT user_name FROM sc_rna_seq WHERE id = '", row ,"';"))[[1]]))))})
          output$project_description <- renderText(dbGetQuery(connec, paste0("SELECT description FROM sc_rna_seq where id='",row,"';"))[[1]])
          
-         info <- info[, c('project_name', 'id', 'source', 'species', 'sex', 'tissue', 'tissue_affiliation', 'cell_disease_status', 'cell_development_status', 'cells_after_qc', 'subclasses_number', 'subtypes_number')]
+         info <- info[, c('project_name', 'id', 'source', 'species', 'sex', 'tissue', 'tissue_affiliation', 'cell_disease_status', 'disease_name', 'cell_development_status', 'cells_after_qc', 'subclasses_number', 'subtypes_number')]
          info <- as.data.frame(t(info))
          info$n <- toupper(rownames(info))
 
@@ -1425,12 +1684,35 @@ server <- function(input, output, session) {
          # output$info_out 
          
          output$explor1 <-  renderTable({info})
-                                                
          
+
+         
+         output$login_element1_download <- login_values$login_element1_download
+         
+         output$login_element2_download <-login_values$login_element2_download
+         
+         
+         output$down_butt <- login_values$down_butt
+         
+                                                
+         #downloaded function
+         output$downloadData <- downloadHandler(
+           filename <- function() { paste0(list.files('../../validated/')[grep(paste0('SC_',row), list.files('../../validated/'))], '.h5') },
+           
+           content <- function(file) {
+             dbGetQuery(connec, paste0("INSERT INTO downloads (user_name, set_id, date) VALUES ('",account_data$USER,"','" , row, "','" , Sys.time(),"');"))
+             
+             file.copy(from = file.path('../../validated/', list.files('../../validated/')[grep(paste0('SC_',row), list.files('../../validated/'))], 'data.h5'), to = file, recursive = TRUE)
+           },
+          
+          )
+         
+         
+       
          
          output$report_b <- renderUI({
            
-           actionButton("report", 'View report', icon = icon('bars'))
+           actionButton("report", 'View report', icon = icon('bars'), width = '200px')
            
          })
                                                 
@@ -1869,16 +2151,22 @@ server <- function(input, output, session) {
   
          
          showModal(modalDialog(
-           title = paste0("Dataset ", row, ' was chosen. Got to Explore tab'),
-           size = 's',
+           size = 'm',
            easyClose = TRUE,
-           footer = NULL
-         ))
+           footer = NULL,
+           HTML({paste0("Dataset ", row, ' was chosen.')}),
+           br(),
+           HTML({paste0('Go to [Info] | [Visualization] | [Markers] | [Gene_viewe] | [Interactions] tabs and start exploring the data')})
+           
+         ),
+        
+         )
        })
 
     
        #END OF EXPLORATION SINGLE CELL DATA   
    }
+   
   
 }
 
